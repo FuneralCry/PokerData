@@ -1,0 +1,17 @@
+clear
+*.py
+PD
+main
+*.jpg
+images
+yolo/VOCdevkit
+yolo/*.py
+yolo/yolov3_train/backup
+yolo/yolov3_train/train.txt
+yolo/yolov3_train/val.txt
+yolo/yolov3_train/voc.data
+yolo/2019*
+build
+.vscode
+lib.a
+example.mp4

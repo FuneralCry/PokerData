@@ -1,0 +1,4 @@
+
+[submodule "Poker"]
+	path = Poker
+	url = https://github.com/Euler-Maskerony/Poker.git
