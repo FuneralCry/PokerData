@@ -23,6 +23,7 @@ namespace pd
     public:
         long long stack;
         bool active{false};
+        bool folded;
 
         Player(const cv::Mat& frame, const cv::Rect& cont);
         void update(const cv::Mat& frame, const cv::Rect& cont);

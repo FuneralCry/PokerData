@@ -38,7 +38,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
         }
     }
     // Specifying center
-    this->center = cv::Point(board.x+board.width,board.y+board.height);
+    this->center = (board.tl() + board.br()) / 2;
     // Sort players in clockwise order
     enumerate_players(players);
     for(cv::Rect player : players)
@@ -73,6 +73,9 @@ void pd::Observe::start()
         std::vector<cv::Rect> players,stakes;
         // Prepare variable for board event
         Events event;
+        // Initialy all players are folded. If we find a card belonging to player we will mark it as non-folded
+        for(pd::Player& p : this->players)
+            p.folded = true;
         // Parse bounding objects
         for(pd::Obj bbox : bboxes)
         {
@@ -89,6 +92,10 @@ void pd::Observe::start()
                 // Collect stakes bounding boxes for future processing
                 case (int)pd::Indices::stake:
                     stakes.push_back(bbox.first);
+                    break;
+                case (int)pd::Indices::card:
+                    auto p_it(std::find_if(this->players.begin(),this->players.end(),[bbox](pd::Player p) { return isIntersects(bbox.first,p.getCont()); }));
+                    p_it->folded = false;
                     break;
             }
         }

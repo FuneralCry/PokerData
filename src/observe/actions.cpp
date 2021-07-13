@@ -2,16 +2,20 @@
 
 void pd::Observe::playerBet(std::vector<pd::Player>::iterator player,cv::Mat&& stake)
 {
-      // Read bet size string from image
+    // Read bet size string from image
     std::string bet_size_str(pd::getText(std::move(stake),TextType::BET));
-      //  Clear it and extract digits
-    boost::erase_all(bet_size_str,".");
-    boost::erase_all(bet_size_str,",");
-    std::regex r("\\d+");
+    //  Clear it and extract digits
+    std::regex r("[0-9]{1,3}([,.] {0,1}[0-8]{1,3})+");
     std::smatch m;
     long long bet_size;
     if(std::regex_search(bet_size_str,m,r))
-        bet_size = std::stoll(m[m.size()-1].str());
+    {
+        bet_size_str = m[0].str();
+        boost::erase_all(bet_size_str," ");
+        boost::erase_all(bet_size_str,",");
+        boost::erase_all(bet_size_str,".");
+        bet_size = std::stoll(bet_size_str);
+    }
     else
     {
         std::cout << *game;
@@ -26,8 +30,7 @@ void pd::Observe::checkFolded(const cv::Mat& frame)
 {
     for(int i(0); i < this->players.size(); ++i)
     {
-        auto bboxes(pd::getBboxes(frame(this->players[i].getCont())));
-        if(std::none_of(bboxes.begin(),bboxes.end(),[](pd::Obj box) { return box.second == (int)pd::Indices::card; }))
+        if(this->players[i].folded)
             this->game->playerAction(i,pkr::fold);
     }
 }

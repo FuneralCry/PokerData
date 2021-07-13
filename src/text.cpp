@@ -3,7 +3,6 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #include "../headers/text.h"
-#include <opencv2/core/ocl.hpp>
 
 namespace pd
 {
@@ -20,7 +19,7 @@ namespace pd
     std::string getText(cv::Mat&& image, TextType&& type)
     {
         int thr,kernel_size;
-        tess::PageSegMode psm;
+        tess::PageSegMode psm(tess::PSM_SINGLE_LINE);
         switch(type)
         {
             case TextType::STACK:
@@ -39,6 +38,7 @@ namespace pd
                 psm = tess::PSM_AUTO;
                 break;
         }
+        thr = 200;
         cv::cvtColor(image,image,cv::COLOR_BGR2GRAY);
         cv::cvtColor(image,image,cv::COLOR_GRAY2RGBA);
         image.convertTo(image,-1,1,50);
@@ -46,8 +46,12 @@ namespace pd
         cv::resize(image,image,cv::Size(),2,2);
         cv::threshold(image,image,thr,255,cv::THRESH_BINARY);
         auto kernel(cv::getStructuringElement(cv::MORPH_RECT,cv::Size(2*kernel_size+1,2*kernel_size+1),cv::Point(kernel_size,kernel_size)));
-        cv::morphologyEx(image,image,cv::MORPH_OPEN,kernel);
+        cv::morphologyEx(image,image,cv::MORPH_OPEN,kernel,cv::Point(-1,-1));
+        kernel_size = 1;
+        kernel = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(2*kernel_size+1,2*kernel_size+1),cv::Point(kernel_size,kernel_size));
+        cv::erode(image,image,kernel);
         cv::bitwise_not(image,image);
+        
         
         static pd::OCR ocr;
         ocr.api.SetImage(image.data,image.cols,image.rows,4,4*image.cols);
