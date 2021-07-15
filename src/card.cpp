@@ -2,6 +2,7 @@
 
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 #include "../headers/card.h"
+#include <algorithm>
 namespace pd
 {
     int Card::getValue() const { return value; }
@@ -19,11 +20,6 @@ namespace pd
                 value = FromYoloToVal[el];
             else if(pd::FromYoloToSuit.find(el) != pd::FromYoloToSuit.end())
                 suit = FromYoloToSuit[el];
-            else if(el != (int)pd::Indices::card)
-            {
-                std::cerr << "Invalid elemnt inside card (" << el << ')' << '\n';
-                throw 1;
-            }
         }
         if(suit == -1 or value == -1)
             throw pd::InterimFrame("Card");

@@ -13,12 +13,9 @@ pd::Player::Player(const cv::Mat& frame, const cv::Rect& cont)
 pd::Player::operator pkr::Player() const
 {
     if(this->hand.size() != 2)
-    {
-        std::cerr << "Can't complete casting to pkr::Player because of invalid hand size (" << this->hand.size() << ')' << '\n';
-        throw 1;
-    }
-
-    return pkr::Player(std::make_pair(this->hand[0],this->hand[1]),this->stack);
+        return pkr::Player();
+    else
+        return pkr::Player(std::make_pair(this->hand[0],this->hand[1]),this->stack);
 }
 
 void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)

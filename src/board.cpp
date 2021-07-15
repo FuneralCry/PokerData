@@ -69,13 +69,23 @@ namespace pd
 
             for(auto& card : cards)  // Processing
             {
-                pd::Card c(pd::Card(card.first,card.second));  // Create instance of pd::Card class 
-                if(std::find(this->cards.begin(),this->cards.end(),c) == this->cards.end())  // If there is one inside the container...
+                pd::Card* c;
+                try
                 {
-                    std::cout << "NEW CARD: " << pkr::CardValuesOut[c.getValue()] << pkr::CardSuitsOut[c.getSuit()] << '\n';
-                    this->cards.push_back(c);  // push it
+                    c = new pd::Card(card.first,card.second);  // Create instance of pd::Card
+                }
+                catch(pd::InterimFrame& ex)
+                {
+                    return pd::Events::NEW_BOARD_CARD;
+                }
+                if(std::find(this->cards.begin(),this->cards.end(),*c) == this->cards.end())  // If there is one inside the container...
+                {
+                    std::cout << "NEW CARD: " << pkr::CardValuesOut[c->getValue()] << pkr::CardSuitsOut[c->getSuit()] << '\n';
+                    this->cards.push_back(*c);  // push it to container
                 }
             }
+            // Update pot size
+            updatePot(board(pot_size_cont));
 
             return Events::NEW_BOARD_CARD;  // Return event type
         }

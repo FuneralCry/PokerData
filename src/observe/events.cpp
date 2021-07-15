@@ -24,6 +24,7 @@ void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
         pkr_players.push_back(player);
     // Reset state
     this->state = 0;
+    std::cout << *game;
     // Delete old game and create new
     delete this->game;
     this->game = new pkr::Game(pkr_players,std::vector<pkr::Card>());
@@ -48,7 +49,7 @@ void pd::Observe::event_NEW_BOARD_CARD()
         case pkr::flop:
         {
             std::vector<pkr::Card> pkr_cards;
-            std::vector<pd::Card> pd_cards;
+            std::vector<pd::Card> pd_cards(this->board->getCards());
             for(pd::Card c : pd_cards)
                 pkr_cards.push_back(c);
             // Trigger game by them all
