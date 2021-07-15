@@ -13,22 +13,44 @@ std::vector<pd::Obj> pd::getBboxes(cv::Mat img)
     std::vector<int> classes;
     cv::Point cls,mn;
 
+    // Make image gray
     cv::cvtColor(img,img,cv::COLOR_BGR2GRAY);
     cv::cvtColor(img,img,cv::COLOR_GRAY2BGR);
+    // Initialize yolo
     static cv::dnn::Net net(cv::dnn::readNetFromDarknet(PATH_TO_CFG,PATH_TO_WEIGHTS));
+    // Create blob and push it through yolo
     net.setInput(cv::dnn::blobFromImage(img,1.0/255.0,cv::Size(416,416),cv::Scalar(0,0),true,false));
     net.forward(out,net.getUnconnectedOutLayersNames());
+    // Collect results from all three yolo layers
     for(std::vector<cv::Mat> el : out)
     {
+        // Iterate over them
         for(int i(0); i < el[0].rows; ++i)
         {
             cv::Mat row(el[0].row(i));
+            // Extract confidence scores and find max
             cv::Mat scores(row.colRange(5,el[0].cols));
             cv::minMaxLoc(scores,&min,&max,&mn,&cls);
+            // If it bigger than threshold...
             if(max > CONF_THRES)
             {
-                cv::Rect rect(cv::Point(int(row.at<float>(0,0)*img.cols-row.at<float>(0,2)*img.cols/2.0),int(row.at<float>(0,1)*img.rows-row.at<float>(0,3)*img.rows/2.0)),cv::Size(int(row.at<float>(0,2)*img.cols),int(row.at<float>(0,3)*img.rows)));
+                // Extract box coordinates
+                int box_width(row.at<float>(0,2)*img.cols),
+                    box_height(row.at<float>(0,3)*img.rows);
+                int box_x(row.at<float>(0,0)*img.cols-box_width/2.0),
+                    box_y(row.at<float>(0,1)*img.rows-box_height/2.0);
+                
+                // Box coordinates must not be out of bounds of image
+                box_x = std::max(0,box_x);
+                box_y = std::max(0,box_y);
+                box_width = std::min(img.cols-box_x,box_width);
+                box_height = std::min(img.rows-box_y,box_height);
 
+                cv::Rect rect(
+                    cv::Point(box_x,box_y),
+                    cv::Size(box_width,box_height)
+                    );
+                // Push results to containers
                 boxes.push_back(rect);
                 confs.push_back(max);
                 classes.push_back(cls.x);
@@ -36,7 +58,9 @@ std::vector<pd::Obj> pd::getBboxes(cv::Mat img)
         }
     }
     std::vector<int> ind;
+    // NMS thresholding
     cv::dnn::NMSBoxes(boxes,confs,CONF_THRES,NMS_TRES,ind);
+    // Create output container box-class_id
     for(int i(0); i < ind.size(); ++i)
         res.push_back(std::make_pair(boxes[ind[i]],classes[ind[i]]));
 

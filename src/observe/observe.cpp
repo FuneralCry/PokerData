@@ -100,9 +100,9 @@ void pd::Observe::start()
             }
         }
         // Search for folded players
-        checkFolded(frame);
+        checkFolded();
         // Process stakes
-        processStakes(frame,stakes);
+        processStakes(stakes);
 
         switch(event)
         {

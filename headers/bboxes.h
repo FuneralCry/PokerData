@@ -21,7 +21,10 @@
 
 namespace pd
 {
+    // Returns bounding boxes of objects and their ids
     std::vector<pd::Obj> getBboxes(cv::Mat);
+    // Returns names array from voc.names
     void getNames(std::vector<std::string>&);
+    // Returns true if common area of two rects is bigger than INTER_SCORE
     bool isIntersects(cv::Rect,cv::Rect);
 }
