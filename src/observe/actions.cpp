@@ -5,16 +5,14 @@ void pd::Observe::playerBet(std::vector<pd::Player>::iterator player,cv::Mat&& s
     // Read bet size string from image
     std::string bet_size_str(pd::getText(std::move(stake),TextType::BET));
     //  Clear it and extract digits
-    std::regex r("[0-9]{1,3}([,.] {0,1}[0-8]{1,3})+");
+    boost::erase_all(bet_size_str,",");
+    boost::erase_all(bet_size_str,".");
+    std::regex r("\\d{6,}");
     std::smatch m;
     long long bet_size;
     if(std::regex_search(bet_size_str,m,r))
     {
-        bet_size_str = m[0].str();
-        boost::erase_all(bet_size_str," ");
-        boost::erase_all(bet_size_str,",");
-        boost::erase_all(bet_size_str,".");
-        bet_size = std::stoll(bet_size_str);
+        bet_size = std::stoll(m[0].str());
     }
     else
     {
@@ -26,7 +24,7 @@ void pd::Observe::playerBet(std::vector<pd::Player>::iterator player,cv::Mat&& s
     this->game->playerAction(std::distance(this->players.begin(),player),pkr::bet,bet_size);
 }
 
-void pd::Observe::checkFolded(const cv::Mat& frame)
+void pd::Observe::checkFolded()
 {
     for(int i(0); i < this->players.size(); ++i)
     {
@@ -35,8 +33,10 @@ void pd::Observe::checkFolded(const cv::Mat& frame)
     }
 }
 
-void pd::Observe::processStakes(const cv::Mat& frame, std::vector<cv::Rect> stakes)
+void pd::Observe::processStakes(std::vector<cv::Rect> stakes)
 {
+    // Get current frame
+    cv::Mat frame(this->video->get());
     // If 'stake' in the middle (pot actually) has gone, then game is over and there is nothing to do
     if(std::none_of(stakes.begin(),stakes.end(),[&](cv::Rect r) { return isIntersects(this->board->getCont(),r); }))
         return;

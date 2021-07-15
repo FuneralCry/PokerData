@@ -23,10 +23,12 @@ cv::Mat VideoPlayer::play()
             break;
     }
     
+    this->frame = frame;
+    
     return frame;
 }
 
-bool VideoPlayer::isPlaying() { return video.isOpened(); }
+bool VideoPlayer::isPlaying() const { return video.isOpened(); }
 
 cv::Mat VideoPlayer::skip(double secs)
 {
@@ -39,5 +41,9 @@ cv::Mat VideoPlayer::skip(double secs)
             break;
     }
 
+    this->frame = frame;
+
     return frame;
 }
+
+cv::Mat VideoPlayer::get() const { return frame; }

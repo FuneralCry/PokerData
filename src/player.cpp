@@ -2,6 +2,7 @@
 
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 #include "../headers/player.h"
+#include <boost/algorithm/string.hpp>
 
 pd::Player::Player(const cv::Mat& frame, const cv::Rect& cont)
 {
@@ -23,11 +24,11 @@ pd::Player::operator pkr::Player() const
 void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
 {
     active = true;
+
+    this->hand.clear();
     this->cont = cont;
     cv::Mat hud(frame(cont));
     std::vector<pd::Obj> rects(pd::getBboxes(frame(cont)));
-    std::vector<std::string> names;
-    pd::getNames(names);
     std::vector<std::pair<cv::Rect,std::vector<int>>> hand; // Contour of card and elements inside
     cv::Rect stack_cont;
     for(pd::Obj rect : rects)
@@ -37,7 +38,6 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
         if(rect.second == (int)pd::Indices::stack)
             stack_cont = rect.first;
     }
-    stack_cont.width = std::min(hud.cols-stack_cont.x-1,stack_cont.width);
     assert(hand.size() == 2 or hand.size() == 0);
     if(hand.size())
     {
@@ -52,10 +52,16 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
         this->hand.push_back(pd::Card(hand[1].first,hand[1].second));
     }
     std::string stack_str(pd::getText(hud(stack_cont),pd::TextType::STACK)),stack_d;
-    std::regex dollar("\\$\\d+\\.\\d+[MK]");
+    boost::erase_all(stack_str," ");
+    std::regex dollar("\\$?\\d+[.,]\\d+[MK]");
     std::smatch res_d;
     if(std::regex_search(stack_str,res_d,dollar))
         stack_d = res_d[0].str().substr(1,res_d[0].str().length()-1);
+    else
+    {
+        std::cerr << "Can't extract stack value (" << stack_str << ')' << '\n';
+        throw 1;
+    }
     long long mult;
     if(*stack_d.rbegin() == 'K')
         mult = 1000;
@@ -63,7 +69,6 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
         mult = 1000000;
     stack_d.erase(stack_d.length()-1);
     this->stack = std::stod(stack_d) * mult;
-    std::cout << stack << '\n';
 }
 
 cv::Rect pd::Player::getCont() const { return this->cont; }

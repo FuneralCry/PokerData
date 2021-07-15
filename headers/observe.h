@@ -45,9 +45,9 @@ namespace pd
         // Reaction on a player's bet
         void playerBet(std::vector<pd::Player>::iterator player,cv::Mat&& stake);
         // Searchs for folded players
-        void checkFolded(const cv::Mat& frame);
+        void checkFolded();
         // Extract useful information from all stakes bboxes
-        void processStakes(const cv::Mat& frame,std::vector<cv::Rect> stakes);
+        void processStakes(std::vector<cv::Rect> stakes);
 
         // Event handeler members
 

@@ -18,6 +18,7 @@ namespace pd
 
     std::string getText(cv::Mat&& image, TextType&& type)
     {
+        std::vector<std::vector<cv::Point>> contours;
         int thr,kernel_size;
         tess::PageSegMode psm(tess::PSM_SINGLE_LINE);
         switch(type)
@@ -35,7 +36,9 @@ namespace pd
             case TextType::BET:
                 thr = BET_THR;
                 kernel_size = 2;
-                psm = tess::PSM_AUTO;
+                psm = tess::PSM_SINGLE_LINE;
+                cv::Rect roi(0,std::max(0,image.rows-65),image.cols,std::min(65,image.rows));
+                image = image(roi);
                 break;
         }
         thr = 200;
@@ -60,6 +63,10 @@ namespace pd
         ocr.api.SetPageSegMode(psm);
         char* textc(ocr.api.GetUTF8Text());
         std::string text(textc);
+        if(text.find("050") != std::string::npos)
+            cv::imwrite("050.jpg",image);
+        if(text.find("550") != std::string::npos)
+            cv::imwrite("550.jpg",image);
         cv::imwrite("1.jpg",image);
         delete[] textc;
 

@@ -3,20 +3,27 @@
 
 void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
 {
-    cv::Mat frame(video->skip(0.5));  // Skip 0.5 seconds to clear picture from animations
+    // Skip 0.5 seconds to clear picture from animations
+    cv::Mat frame(video->get());  // TODO
     for(cv::Rect rect : players)
     {
-        auto p(std::find_if(this->players.begin(),this->players.end(),[rect](const pd::Player& p){ return isIntersects(p.getCont(),rect); }));  // Find player according to rect
-        p->update(frame,rect);  // Update it
+        // Find player according to rect
+        auto p(std::find_if(this->players.begin(),this->players.end(),[rect](const pd::Player& p){ return isIntersects(p.getCont(),rect); }));
+        // Update it
+        p->update(frame,rect);
         std::cout << p->stack << '\n';
     }
-    eraseEliminated();  // Delete eliminated players
-    std::rotate(this->players.begin(),this->players.begin()+1,this->players.end());  // Shift players to keep order from SB to BU
+    // Delete eliminated players
+    eraseEliminated();
+    // Shift players to keep order from SB to BU
+    std::rotate(this->players.begin(),this->players.begin()+1,this->players.end());
     std::cout << *game;
-    delete game;  // Delete old game
+    // Delete old game
+    delete game;
     std::vector<pkr::Player> pkr_players;
+    // Create new players
     for(pd::Player player : this->players)
-        pkr_players.push_back(player);  // Create new players
+        pkr_players.push_back(player);
     game = new pkr::Game(pkr_players,std::vector<pkr::Card>());  // Create new game
 }
 

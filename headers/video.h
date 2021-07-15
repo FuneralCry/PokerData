@@ -22,8 +22,9 @@ public:
 
     void setFps(int fps);  // Sets fps
     cv::Mat play();  // Returns next frame
-    bool isPlaying();  // Returns true if opened
+    bool isPlaying() const;  // Returns true if opened
     cv::Mat skip(double secs);  // Skip frames according to secs
+    cv::Mat get() const;  // Returns current frame
 };
 
 #endif
