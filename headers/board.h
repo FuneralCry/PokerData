@@ -10,11 +10,12 @@
 #include <regex>
 #include "text.h"
 #include "card.h"
-#include "../Poker/headers/poker.h"
+#include "exception.h"
 #include "vars.h"
 #include "bboxes.h"
 #include "events.h"
 #include "video.h"
+#include "../Poker/headers/poker.h"
 
 namespace pd
 {

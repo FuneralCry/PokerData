@@ -54,9 +54,10 @@ namespace pd
                 pot_size_cont = rect.first;
         }
         assert(cards.size() <= 5 & not pot_size_cont.empty());
-        if(cards.size() > this->cards.size())  // If there are more cards then eralier...
+        if(cards.size() < 3 and cards.size() > 0)
+            throw pd::InterimFrame("Board");
+        else if(cards.size() > this->cards.size())  // If there are more cards then eralier...
         {
-            cv::imwrite("board" + std::to_string(cards.size()) + ".jpg",board);
             for(auto& card : cards)  // Prepare cards contours for processing
             {
                 for(pd::Obj rect : rects)

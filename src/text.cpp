@@ -36,7 +36,7 @@ namespace pd
             case TextType::BET:
                 thr = BET_THR;
                 kernel_size = 2;
-                psm = tess::PSM_SINGLE_LINE;
+                psm = tess::PSM_SINGLE_BLOCK;
                 cv::Rect roi(0,std::max(0,image.rows-65),image.cols,std::min(65,image.rows));
                 image = image(roi);
                 break;

@@ -10,8 +10,9 @@
 #include "bboxes.h"
 #include "vars.h"
 #include "card.h"
-#include "../Poker/headers/poker.h"
 #include "text.h"
+#include "exception.h"
+#include "../Poker/headers/poker.h"
 
 namespace pd
 {

@@ -38,7 +38,8 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
         if(rect.second == (int)pd::Indices::stack)
             stack_cont = rect.first;
     }
-    assert(hand.size() == 2 or hand.size() == 0);
+    if(hand.size() != 2 and hand.size() != 0)
+        throw pd::InterimFrame("Player");
     if(hand.size())
     {
         for(pd::Obj rect : rects)

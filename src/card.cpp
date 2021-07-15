@@ -25,7 +25,8 @@ namespace pd
                 throw 1;
             }
         }
-        assert(suit != -1 and value != -1);
+        if(suit == -1 or value == -1)
+            throw pd::InterimFrame("Card");
     }
 
     Card::operator pkr::Card() const { return pkr::Card(value,suit); }

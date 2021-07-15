@@ -14,7 +14,8 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
         frame = this->video->play();
     }
     while(not isFirstFrame(frame));
-    frame = video->skip(2);  // Clear picture from animations
+    // Clear picture from animations
+    frame = video->skip(2);
     cv::imwrite("first.jpg",frame);
     // Set user fps
     this->video->setFps(fps);
@@ -66,52 +67,67 @@ void pd::Observe::start()
     cv::Mat frame;
     while(this->video->isPlaying())
     {
-        frame = this->video->play();
-        // Get bounding boxes of objects and their types
-        std::vector<pd::Obj> bboxes(pd::getBboxes(frame));
-         // Prepare containers forboxes
-        std::vector<cv::Rect> players,stakes;
-        // Prepare variable for board event
-        Events event;
-        // Initialy all players are folded. If we find a card belonging to player we will mark it as non-folded
-        for(pd::Player& p : this->players)
-            p.folded = true;
-        // Parse bounding objects
-        for(pd::Obj bbox : bboxes)
+        try
         {
-            switch(bbox.second)
+            // Get next frame
+            frame = this->video->play();
+            // Get bounding boxes of objects and their types
+            std::vector<pd::Obj> bboxes(pd::getBboxes(frame));
+            // Prepare containers for boxes
+            std::vector<cv::Rect> players,stakes;
+            // Initialy all players are folded. If we find a card belonging to player we will mark it as non-folded
+            for(pd::Player& p : this->players)
+                p.folded = true;
+            // Parse bounding objects
+            for(pd::Obj bbox : bboxes)
             {
-                // Only collect players boxes (updating is quite expensive so we do it according to board events)
-                case (int)pd::Indices::hud:
-                    players.push_back(bbox.first);
+                switch(bbox.second)
+                {
+                    // Only collect players boxes (updating is quite expensive so we do it according to board events)
+                    case (int)pd::Indices::hud:
+                        players.push_back(bbox.first);
+                        break;
+                    // Update board class instantly
+                    case (int)pd::Indices::board:
+                        this->event.update(this->board->update(frame,bbox.first));
+                        break;
+                    // Collect stakes bounding boxes for future processing
+                    case (int)pd::Indices::stake:
+                        stakes.push_back(bbox.first);
+                        break;
+                    case (int)pd::Indices::card:
+                        // Find players with card
+                        auto p_it(std::find_if(this->players.begin(),this->players.end(),[bbox](pd::Player p) { return isIntersects(bbox.first,p.getCont()); }));
+                        // Consider him as non-folded
+                        p_it->folded = false;
+                        break;
+                }
+            }
+
+            switch(this->event.get())
+            {
+                case pd::Events::NU:
+                    // Search for folded players
+                    checkFolded();
+                    // Process stakes
+                    processStakes(stakes);
                     break;
-                // Update board class instantly
-                case (int)pd::Indices::board:
-                    event = this->board->update(frame,bbox.first);
+                case pd::Events::NEW_BOARD_CARD:
+                    // Search for folded players
+                    checkFolded();
+                    // Process stakes
+                    processStakes(stakes);
+                    event_NEW_BOARD_CARD();
                     break;
-                // Collect stakes bounding boxes for future processing
-                case (int)pd::Indices::stake:
-                    stakes.push_back(bbox.first);
-                    break;
-                case (int)pd::Indices::card:
-                    auto p_it(std::find_if(this->players.begin(),this->players.end(),[bbox](pd::Player p) { return isIntersects(bbox.first,p.getCont()); }));
-                    p_it->folded = false;
+                case pd::Events::NEW_GAME:
+                    // Don't checkFolded and processStakes because board is clearing
+                    event_NEW_GAME(players);
                     break;
             }
         }
-        // Search for folded players
-        checkFolded();
-        // Process stakes
-        processStakes(stakes);
-
-        switch(event)
+        catch(pd::InterimFrame& ex)
         {
-            case Events::NEW_BOARD_CARD:
-                event_NEW_BOARD_CARD();
-                break;
-            case Events::NEW_GAME:
-                event_NEW_GAME(players);
-                break;
+            std::cout << ex.what() << '\n';
         }
     }
 }

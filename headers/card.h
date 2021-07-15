@@ -6,6 +6,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include "vars.h"
+#include "exception.h"
 #include "../Poker/headers/poker.h"
 
 namespace pd
