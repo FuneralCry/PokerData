@@ -28,8 +28,8 @@ namespace pd
         long long pot_size{NULL};
     public:
         Board() = delete;
-        Board(const cv::Mat& frame,const cv::Rect& cont);
-        Events update(const cv::Mat& frame,const cv::Rect& cont);
+        Board(const cv::Mat& frame,const cv::Rect& cont,pd::EventGuard&);
+        void update(const cv::Mat& frame,const cv::Rect& cont,pd::EventGuard&);
         void updatePot(cv::Mat&&);
         std::vector<pd::Card> getCards() const;
         long long getPotSize() const;

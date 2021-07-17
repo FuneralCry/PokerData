@@ -51,7 +51,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
         std::rotate(this->players.begin(),button_player+1,this->players.end());
     }
     // Create board
-    this->board = new pd::Board(frame,board);
+    this->board = new pd::Board(frame,board,this->event);
     // Create game
     std::vector<pkr::Player> pkr_players;
     std::vector<pkr::Card> pkr_board(*this->board);
@@ -89,7 +89,7 @@ void pd::Observe::start()
                         break;
                     // Update board class instantly
                     case (int)pd::Indices::board:
-                        this->event.update(this->board->update(frame,bbox.first));
+                        this->board->update(frame,bbox.first,this->event);
                         break;
                     // Collect stakes bounding boxes for future processing
                     case (int)pd::Indices::stake:
