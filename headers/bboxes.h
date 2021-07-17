@@ -12,9 +12,9 @@
 #include <algorithm>
 #include "vars.h"
 
-#define CONF_THRES 0.5
+#define CONF_THRES 0.7
 #define NMS_TRES 0.4
-#define INTER_SCORE 0.75
+#define INTER_SCORE 0.5
 #define PATH_TO_CFG "../res/yolo/yolov3-voc.cfg"
 #define PATH_TO_WEIGHTS "../res/yolo/model.weights"
 #define PATH_TO_NAMES "../res/yolo/voc.names"

@@ -44,8 +44,10 @@ namespace pd
     {
         this->cont = cont;
         cv::Mat board(frame(cont));
+        // Find objects on the board
         std::vector<pd::Obj> bboxes(pd::getBboxes(frame(cont)));
-        std::vector<std::pair<cv::Rect,std::vector<int>>> cards; // Contour of card and elements inside
+        // Contour of card and elements inside
+        std::vector<std::pair<cv::Rect,std::vector<int>>> cards;
         for(pd::Obj rect : bboxes)
         {
             if(rect.second == (int)pd::Indices::card)
@@ -53,13 +55,18 @@ namespace pd
             if(rect.second == (int)pd::Indices::pot_size)
                 pot_size_cont = rect.first;
         }
-        assert(cards.size() <= 5 & not pot_size_cont.empty());
+        // Check if there are suitable amount of cards and pot size has been found
+        assert(cards.size() <= 5 and not pot_size_cont.empty());
+        // If there are not enough cards throw an exception
         if(cards.size() < 3 and cards.size() > 0)
-            throw pd::InterimFrame("Board");
-        else if(cards.size() > this->cards.size())  // If there are more cards then eralier...
+            throw pd::InterimFrame("void pd::Board::update(...)");
+        // If there are more cards then eralier...
+        else if(cards.size() > this->cards.size())
         {
+            // Firstly update event type
             event.update(pd::Events::NEW_BOARD_CARD);
-            for(auto& card : cards)  // Prepare cards contours for processing
+            // For all cards find elements inside
+            for(auto& card : cards)
             {
                 for(pd::Obj bbox : bboxes)
                 {
@@ -67,25 +74,34 @@ namespace pd
                         card.second.push_back(bbox.second);
                 }
             }
-            for(auto& card : cards)  // Processing
+            // Processing
+            for(auto& card : cards)
             {
-                pd::Card c(card.first,card.second);  // Create instance of pd::Card
-                if(std::find(this->cards.begin(),this->cards.end(),c) == this->cards.end())  // If there is one inside the container...
+                // Create instance of pd::Card
+                pd::Card c(card.first,card.second);
+                // If there is one inside the container...
+                if(std::find(this->cards.begin(),this->cards.end(),c) == this->cards.end())
                 {
                     std::cout << "NEW CARD: " << pkr::CardValuesOut[c.getValue()] << pkr::CardSuitsOut[c.getSuit()] << '\n';
-                    this->cards.push_back(c);  // push it to container
+                    // push it to container
+                    this->cards.push_back(c);
                 }
             }
             // Update pot size
             updatePot(board(pot_size_cont));
         }
-        else if(cards.size() < this->cards.size())  // If board has been cleared...
+        // If board has been cleared...
+        else if(cards.size() < this->cards.size())
         {
+            // update event type
             event.update(pd::Events::NEW_GAME);
+            // clear board
             this->cards.clear();
-            updatePot(board(pot_size_cont));  // update pot size
+            // update pot size
+            updatePot(board(pot_size_cont));
         }
+        // Otherwise do nothing and just update event type
         else
-            event.update(pd::Events::NU);  // Otherwise do nothing and return NULL event
+            event.update(pd::Events::NU);
     }
 }

@@ -22,7 +22,7 @@ namespace pd
                 suit = FromYoloToSuit[el];
         }
         if(suit == -1 or value == -1)
-            throw pd::InterimFrame("Card");
+            throw pd::InterimFrame("pd::Card::Card(...)");
     }
 
     Card::operator pkr::Card() const { return pkr::Card(value,suit); }

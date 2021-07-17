@@ -12,10 +12,7 @@ pd::Player::Player(const cv::Mat& frame, const cv::Rect& cont)
 
 pd::Player::operator pkr::Player() const
 {
-    if(this->hand.size() != 2)
-        return pkr::Player();
-    else
-        return pkr::Player(std::make_pair(this->hand[0],this->hand[1]),this->stack);
+    return pkr::Player(std::make_pair(this->hand[0],this->hand[1]),this->stack);
 }
 
 void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
@@ -35,8 +32,8 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
         if(rect.second == (int)pd::Indices::stack)
             stack_cont = rect.first;
     }
-    if(hand.size() != 2 and hand.size() != 0)
-        throw pd::InterimFrame("Player");
+    if(hand.size() != 2)
+        throw pd::InterimFrame("void pd::Player::update(...)");
     if(hand.size())
     {
         for(pd::Obj rect : rects)

@@ -8,6 +8,7 @@ void pd::EventGuard::update(pd::Events&& event)
 {
     switch(event)
     {
+        // We switch event type only if 'event' is not NU
         case pd::Events::NEW_BOARD_CARD:
             [[fallthrough]];
         case pd::Events::NEW_GAME:
@@ -16,4 +17,5 @@ void pd::EventGuard::update(pd::Events&& event)
     }
 }
 
+//Switch event type to NU
 void pd::EventGuard::reset() { this->type = pd::Events::NU; }
