@@ -53,10 +53,7 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
     if(std::regex_search(stack_str,res_d,dollar))
         stack_d = res_d[0].str().substr(1,res_d[0].str().length()-1);
     else
-    {
-        std::cerr << "Can't extract stack value (" << stack_str << ')' << '\n';
-        throw 1;
-    }
+        throw pd::bad_text_recognition("void pd::Player::update(...)");
     long long mult;
     if(*stack_d.rbegin() == 'K')
         mult = 1000;

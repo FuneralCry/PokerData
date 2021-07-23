@@ -5,12 +5,6 @@ void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
 {
     // Get current frame
     cv::Mat frame(video->get());
-    cv::Mat image = frame;
-    for(cv::Rect rect : players)
-        cv::rectangle(image,rect,cv::Scalar(94,23,255));
-    for(auto p : this->players)
-        cv::rectangle(image,p.getCont(),cv::Scalar(255,89,45));
-    cv::imwrite("im.jpg",image);
     for(cv::Rect rect : players)
     {
         // Find player according to rect
@@ -19,10 +13,7 @@ void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
             // Update it
             p->update(frame,rect);
         else
-        {
-            std::cerr << "Can't find player according to rect" << '\n';
-            throw 1;
-        }
+            throw std::invalid_argument("Can't find player according to rect");
     }
     // Delete eliminated players
     eraseEliminated();
@@ -67,8 +58,7 @@ void pd::Observe::event_NEW_BOARD_CARD()
             break;
         }
         default:
-            std::cerr << "Invalid state" << '\n';
-            throw 1;
+            throw std::invalid_argument("Invalid state");
     }
     // Event is NU now
     this->event.reset();

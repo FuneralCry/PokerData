@@ -3,10 +3,7 @@
 VideoPlayer::VideoPlayer(const std::string& path)
 {
     if(not video.open(path))
-    {
-        std::cerr << "Can't open video file" << '\n';
-        throw 1;
-    }
+        throw std::logic_error("Can't open video file");
     this->fps = video.get(cv::CAP_PROP_FPS);
 }
 

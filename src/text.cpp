@@ -63,44 +63,9 @@ namespace pd
         ocr.api.SetPageSegMode(psm);
         char* textc(ocr.api.GetUTF8Text());
         std::string text(textc);
-        if(text.find("050") != std::string::npos)
-            cv::imwrite("050.jpg",image);
-        if(text.find("550") != std::string::npos)
-            cv::imwrite("550.jpg",image);
         cv::imwrite("1.jpg",image);
         delete[] textc;
 
         return text;
-    }
-
-    void detectText(cv::Mat& image, cv::Rect& bbox)
-    {
-        cv::Mat r_image;
-        cv::resize(image,r_image,cv::Size(image.cols/32*32,image.rows/32*32));
-
-        std::vector<std::vector<cv::Point>> bboxes;
-        std::vector<float> confs;
-        cv::dnn::TextDetectionModel_EAST dtctr("east_text_detection.pb");
-        dtctr.setConfidenceThreshold(CONF_THR).setNMSThreshold(NMS_THR);
-
-        double detScale(1.0);
-        cv::Size inputSize(cv::Size(r_image.cols,r_image.rows));
-        cv::Scalar detMean = cv::Scalar(123.68, 116.78, 103.94);
-        bool swapRB = true;
-
-        dtctr.setInputParams(detScale,inputSize,detMean,swapRB);
-        dtctr.detect(image,bboxes);
-
-        if(bboxes.size())
-        {
-            std::vector<cv::Point> pnts(bboxes[0]);
-            std::sort(pnts.begin(),pnts.end(),[](cv::Point& a,cv::Point& b){ return std::pow(a.x,2)+std::pow(a.y,2) > std::pow(a.y,2)+std::pow(b.y,2); });
-            bbox = cv::Rect(pnts[0],pnts[pnts.size()-1]);
-        }
-        else
-        {
-            std::cerr << "Text hasn't been found." << '\n';
-            throw 1;
-        }
     }
 }

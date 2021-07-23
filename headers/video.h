@@ -8,6 +8,7 @@
 #include <opencv2/text/ocr.hpp>
 #include <opencv2/dnn/dnn.hpp>
 #include <iostream>
+#include <stdexcept>
 
 class VideoPlayer
 {
