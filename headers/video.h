@@ -14,7 +14,7 @@ class VideoPlayer
 {
 private:
     cv::VideoCapture video;
-    long time_pos;
+    long duration;
     int fps;
     cv::Mat frame;
 public:
@@ -26,6 +26,8 @@ public:
     bool isPlaying() const;  // Returns true if opened
     cv::Mat skip(double secs);  // Skip frames according to secs
     cv::Mat get() const;  // Returns current frame
+    long getDuration() const;
+    long getTime() const;
 };
 
 #endif

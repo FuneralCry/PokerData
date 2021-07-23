@@ -27,7 +27,7 @@ void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
     this->event.reset();
     // Reset state
     this->state = 0;
-    std::cout << *game;
+    //createLogEntry(*game,"");
     // Delete old game and create new
     delete this->game;
     this->game = new pkr::Game(pkr_players,std::vector<pkr::Card>());
@@ -35,8 +35,8 @@ void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
 
 void pd::Observe::event_NEW_BOARD_CARD()
 {
-    ++state;
-    std::cout << "STATE: " << state << '\n';
+    ++this->state;
+    pd::createLogEntry("Current state now is: " + std::to_string(this->state),"INFO");
     switch(state)
     {
         // Turn and river has one new card
@@ -62,5 +62,4 @@ void pd::Observe::event_NEW_BOARD_CARD()
     }
     // Event is NU now
     this->event.reset();
-    std::cout << *game;
 }

@@ -5,8 +5,11 @@
 
 pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
 {
+    this->start_time = std::chrono::system_clock::now();
     // Cut intro
     video = new VideoPlayer(path);
+    this->progress = new pd::ProgressBar(video);
+    this->progress->update();
     cv::Mat frame;
     this->video->setFps(1);
     do
@@ -59,7 +62,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
         pkr_players.push_back(p);
     this->game = new pkr::Game(pkr_players,pkr_board);
     this->state = this->game->getState();
-    std::cout << "STATE: " << state << '\n';
+    pd::createLogEntry("Start up has been finished. Current state is: " + std::to_string(this->state), "INFO");
 }
 
 void pd::Observe::start()
@@ -69,6 +72,7 @@ void pd::Observe::start()
     {
         try
         {
+            this->progress->update();
             // Get next frame
             frame = this->video->play();
             // Get bounding boxes of objects and their types
@@ -127,7 +131,11 @@ void pd::Observe::start()
         }
         catch(pd::InterimFrame& ex)
         {
-            std::cout << ex.what() << '\n';
+            pd::createLogEntry(ex.what(),"WARNING");
+        }
+        catch(std::exception& ex)
+        {
+            pd::createLogEntry(ex.what(),"ERROR");
         }
     }
 }

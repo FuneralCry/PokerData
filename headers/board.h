@@ -15,6 +15,7 @@
 #include "bboxes.h"
 #include "events.h"
 #include "video.h"
+#include "output.h"
 #include "../Poker/headers/poker.h"
 
 namespace pd

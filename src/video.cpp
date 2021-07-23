@@ -5,6 +5,7 @@ VideoPlayer::VideoPlayer(const std::string& path)
     if(not video.open(path))
         throw std::logic_error("Can't open video file");
     this->fps = video.get(cv::CAP_PROP_FPS);
+    this->duration = video.get(cv::CAP_PROP_FRAME_COUNT) / video.get(cv::CAP_PROP_FPS);
 }
 
 void VideoPlayer::setFps(int fps) { this->fps = fps; }
@@ -44,3 +45,7 @@ cv::Mat VideoPlayer::skip(double secs)
 }
 
 cv::Mat VideoPlayer::get() const { return frame; }
+
+long VideoPlayer::getDuration() const { return this->duration; }
+
+long VideoPlayer::getTime() const { return video.get(cv::CAP_PROP_POS_FRAMES) / video.get(cv::CAP_PROP_FPS); }

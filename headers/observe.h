@@ -15,6 +15,7 @@
 #include "vars.h"
 #include "video.h"
 #include "exception.h"
+#include "output.h"
 #include "../Poker/headers/poker.h"
 
 namespace pd
@@ -29,6 +30,8 @@ namespace pd
         int state;  // Current game state
         cv::Point center;  // Reference point for specifying angels for players. Basicly it is center of bottom edge of board contour
         pd::EventGuard event;
+        pd::ProgressBar* progress;
+        std::chrono::time_point<std::chrono::system_clock> start_time;
 
         // Misc
 
