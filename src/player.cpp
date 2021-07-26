@@ -4,10 +4,10 @@
 #include "../headers/player.h"
 #include <boost/algorithm/string.hpp>
 
-pd::Player::Player(const cv::Mat& frame, const cv::Rect& cont)
+pd::Player::Player(const cv::Mat& frame, const cv::Rect& cont, bool allow_fold)
 {
     this->cont = cont;
-    this->update(frame,cont);
+    this->update(frame,cont,allow_fold);
 }
 
 pd::Player::operator pkr::Player() const
@@ -15,7 +15,7 @@ pd::Player::operator pkr::Player() const
     return pkr::Player(std::make_pair(this->hand[0],this->hand[1]),this->stack);
 }
 
-void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
+void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont, bool allow_fold)
 {
     active = true;
 
@@ -32,7 +32,7 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
         if(rect.second == (int)pd::Indices::stack)
             stack_cont = rect.first;
     }
-    if(hand.size() != 2)
+    if(hand.size() != 2 and not allow_fold)
         throw pd::InterimFrame("void pd::Player::update(...)");
     if(hand.size())
     {
@@ -46,6 +46,9 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
         this->hand.push_back(pd::Card(hand[0].first,hand[0].second));
         this->hand.push_back(pd::Card(hand[1].first,hand[1].second));
     }
+    else
+        this->folded = true;
+
     std::string stack_str(pd::getText(hud(stack_cont),pd::TextType::STACK)),stack_d;
     boost::erase_all(stack_str," ");
     std::regex dollar("\\$?\\d+[.,]\\d+[MK]");
@@ -64,3 +67,13 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
 }
 
 cv::Rect pd::Player::getCont() const { return this->cont; }
+
+std::string pd::Player::status() const
+{
+    std::string res;
+    res += nickname.empty() ? "Foo " : nickname + ' ';
+    res += "$ " + this->stack == NULL ? "null " : std::to_string(this->stack) + ' ';
+    res += this->hand.size() == 2 ? (std::string)this->hand[0] + '/' + (std::string)this->hand[1] : "folded";
+
+    return res;
+}

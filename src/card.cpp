@@ -26,4 +26,6 @@ namespace pd
     }
 
     Card::operator pkr::Card() const { return pkr::Card(value,suit); }
+
+    Card::operator std::string() const { return pkr::Card(*this); }
 }

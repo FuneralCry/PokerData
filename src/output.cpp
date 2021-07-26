@@ -7,20 +7,22 @@ pd::ProgressBar::ProgressBar(VideoPlayer* video)
 {
     if(stdscr == nullptr)
         initscr();
-    this->win = newwin(1,COLS,LINES-1,0);
+    this->win = newwin(3,COLS-2,LINES-3,1);
+    box(this->win,0,0);
     if(this->video == nullptr)
         this->video = video;
 }
 
 void pd::ProgressBar::update()
 {
+    wmove(this->win,1,1);
     long duration(this->video->getDuration());
     long time(this->video->getTime());
     int percentage(100 * time / duration);
-    std::string progress("\r");
+    std::string progress;
     progress += '[' + pd::tohhmmss(time) + '/' + pd::tohhmmss(duration) + ']' + ' ';
-    int bar_len(COLS-progress.size()-1);
-    progress += std::string(bar_len*percentage/100,'#');
+    int bar_len(COLS-progress.size()-4);
+    progress += std::string(bar_len*percentage/100,'#') + std::string(bar_len-bar_len*percentage/100,' ');
     wprintw(this->win,progress.c_str());
     refresh();
     wrefresh(this->win);
@@ -46,11 +48,9 @@ std::string pd::tohhmmss(long seconds)
     return res;
 }
 
-void pd::createLogEntry(std::string message, std::string tag)
+void pd::createLogEntry(std::string message, std::string tag, long time)
 {
-    static auto start_time(std::chrono::system_clock::now());
-    long curr_time = std::chrono::duration<double>(std::chrono::system_clock::now()-start_time).count();
-    std::string log = '[' + pd::tohhmmss(curr_time) + ']' + '[' + tag + "] " + message + '\n';
+    std::string log = '[' + pd::tohhmmss(time) + ']' + '[' + tag + "] " + message + '\n';
     printw(log.c_str());
     refresh();
 }

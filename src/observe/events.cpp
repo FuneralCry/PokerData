@@ -3,15 +3,22 @@
 
 void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
 {
+    this->new_game_time += (double)1/(double)this->fps;
+    pd::createLogEntry("Forcibly complete new game fase on this iteration: " + std::to_string(this->new_game_time >= NEW_GAME_TIME_LIMIT),
+        "INFO", this->video->getTime());
     // Get current frame
     cv::Mat frame(video->get());
+    pd::createLogEntry("Updating players...", "INFO", this->video->getTime());
     for(cv::Rect rect : players)
     {
         // Find player according to rect
         auto p(std::find_if(this->players.begin(),this->players.end(),[rect](const pd::Player& p){ return isIntersects(p.getCont(),rect); }));
         if(p != this->players.end())
+        {
             // Update it
-            p->update(frame,rect);
+            p->update(frame,rect,this->new_game_time >= NEW_GAME_TIME_LIMIT);
+            pd::createLogEntry(p->status(),"INFO", this->video->getTime());
+        }
         else
             throw std::invalid_argument("Can't find player according to rect");
     }
@@ -31,12 +38,12 @@ void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
     // Delete old game and create new
     delete this->game;
     this->game = new pkr::Game(pkr_players,std::vector<pkr::Card>());
+    this->new_game_time = 0;
 }
 
 void pd::Observe::event_NEW_BOARD_CARD()
 {
     ++this->state;
-    pd::createLogEntry("Current state now is: " + std::to_string(this->state),"INFO");
     switch(state)
     {
         // Turn and river has one new card
@@ -60,6 +67,8 @@ void pd::Observe::event_NEW_BOARD_CARD()
         default:
             throw std::invalid_argument("Invalid state");
     }
+    pd::createLogEntry("Current state now is: " + pkr::SatesOut[this->state], "INFO", this->video->getTime());
+    pd::createLogEntry("Board: " + this->game->getBoard(), "INFO", this->video->getTime());
     // Event is NU now
     this->event.reset();
 }

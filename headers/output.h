@@ -11,7 +11,7 @@ namespace pd
 {
     std::string tohhmmss(long seconds);
 
-    void createLogEntry(std::string message,std::string tag);
+    void createLogEntry(std::string message,std::string tag,long time);
 
     class ProgressBar
     {

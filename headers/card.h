@@ -23,6 +23,7 @@ namespace pd
         int getSuit() const;
 
         operator pkr::Card() const;
+        operator std::string() const;
         friend bool operator==(const pd::Card&, const pd::Card&);
     };
 }

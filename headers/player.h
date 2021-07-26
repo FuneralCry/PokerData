@@ -21,14 +21,16 @@ namespace pd
     private:
         cv::Rect cont;
         std::vector<pd::Card> hand;
+        std::string nickname;
     public:
-        long long stack;
+        long long stack{NULL};
         bool active{false};
         bool folded;
 
-        Player(const cv::Mat& frame, const cv::Rect& cont);
-        void update(const cv::Mat& frame, const cv::Rect& cont);
+        Player(const cv::Mat& frame, const cv::Rect& cont,bool allow_fold);
+        void update(const cv::Mat& frame, const cv::Rect& cont,bool allow_fold);
         cv::Rect getCont() const;
+        std::string status() const;
         
         operator pkr::Player() const;
     };

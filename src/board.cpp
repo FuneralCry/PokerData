@@ -82,7 +82,6 @@ namespace pd
                 // If there is one inside the container...
                 if(std::find(this->cards.begin(),this->cards.end(),c) == this->cards.end())
                 {
-                    pd::createLogEntry("New card detected: " + pkr::CardValuesOut[c.getValue()] + pkr::CardSuitsOut[c.getSuit()], "INFO");
                     // push it to container
                     this->cards.push_back(c);
                 }

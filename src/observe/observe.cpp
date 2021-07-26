@@ -5,6 +5,8 @@
 
 pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
 {
+    initscr();
+    scrollok(stdscr,true);
     this->start_time = std::chrono::system_clock::now();
     // Cut intro
     video = new VideoPlayer(path);
@@ -46,7 +48,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     // Sort players in clockwise order
     enumerate_players(players);
     for(cv::Rect player : players)
-        this->players.push_back(pd::Player(frame,player));
+        this->players.push_back(pd::Player(frame,player,this->new_game_time >= NEW_GAME_TIME_LIMIT));
     // Order players from SB to BU
     if(not button.empty())
     {
@@ -62,7 +64,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
         pkr_players.push_back(p);
     this->game = new pkr::Game(pkr_players,pkr_board);
     this->state = this->game->getState();
-    pd::createLogEntry("Start up has been finished. Current state is: " + std::to_string(this->state), "INFO");
+    pd::createLogEntry("Start up has been finished. Current state is: " + pkr::SatesOut[this->state], "INFO",this->video->getTime());
 }
 
 void pd::Observe::start()
@@ -131,11 +133,11 @@ void pd::Observe::start()
         }
         catch(pd::InterimFrame& ex)
         {
-            pd::createLogEntry(ex.what(),"WARNING");
+            pd::createLogEntry(ex.what(),"WARNING",this->video->getTime());
         }
         catch(std::exception& ex)
         {
-            pd::createLogEntry(ex.what(),"ERROR");
+            pd::createLogEntry(ex.what(),"ERROR",this->video->getTime());
         }
     }
 }

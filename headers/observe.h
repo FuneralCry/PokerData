@@ -18,12 +18,15 @@
 #include "output.h"
 #include "../Poker/headers/poker.h"
 
+#define NEW_GAME_TIME_LIMIT 3
+
 namespace pd
 {
     class Observe
     {
     private:
         int fps;
+        double new_game_time{0};
         pkr::Game* game;  // Poker engine
         std::vector<pd::Player> players; // Players container
         pd::Board* board;  // Board class
