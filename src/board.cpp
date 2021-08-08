@@ -45,7 +45,7 @@ namespace pd
         this->cont = cont;
         cv::Mat board(frame(cont));
         // Find objects on the board
-        std::vector<pd::Obj> bboxes(pd::getBboxes(frame(cont)));
+        std::vector<pd::Obj> bboxes(pd::Models::getBboxes(frame(cont)));
         // Contour of card and elements inside
         std::vector<std::pair<cv::Rect,std::vector<int>>> cards;
         for(pd::Obj rect : bboxes)

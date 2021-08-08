@@ -12,12 +12,7 @@
 
 int main()
 {
-    /*
-    cv::Mat i(cv::imread("11.jpg"));
-    auto boxes(pd::getBboxes(i));
-    std::for_each(boxes.begin(),boxes.end(),[i](pd::Obj a){cv::rectangle(i,a.first,cv::Scalar(255,11,467));});
-    cv::imwrite("out.jpg",i);
-    */
+
     std::string path(VIDEO_PATH);
     pd::Observe obs(path,FPS);
     obs.start();

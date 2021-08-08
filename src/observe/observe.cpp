@@ -6,6 +6,7 @@
 pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
 {
     initscr();
+    pd::Models::addModel(cv::dnn::readNetFromDarknet(PATH_TO_CFG,PATH_TO_WEIGHTS));
     scrollok(stdscr,true);
     this->start_time = std::chrono::system_clock::now();
     // Cut intro
@@ -27,7 +28,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     std::vector<cv::Rect> players;
     cv::Rect button,board;
     // Find all informative objects to initialize game
-    std::vector<pd::Obj> bboxes(getBboxes(frame));
+    std::vector<pd::Obj> bboxes(pd::Models::getBboxes(frame));
     for(pd::Obj bbox : bboxes)
     {
         switch(bbox.second)
@@ -78,7 +79,7 @@ void pd::Observe::start()
             // Get next frame
             frame = this->video->play();
             // Get bounding boxes of objects and their types
-            std::vector<pd::Obj> bboxes(pd::getBboxes(frame));
+            std::vector<pd::Obj> bboxes(pd::Models::getBboxes(frame));
             // Prepare containers for boxes
             std::vector<cv::Rect> players,stakes;
             // Initialy all players are folded. If we find a card belonging to player we will mark it as non-folded

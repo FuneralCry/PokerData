@@ -15,13 +15,13 @@ class VideoPlayer
 private:
     cv::VideoCapture video;
     long duration;
-    int fps;
+    double fps;
     cv::Mat frame;
 public:
     VideoPlayer() = delete;
     VideoPlayer(const std::string& path);
 
-    void setFps(int fps);  // Sets fps
+    void setFps(double fps);  // Sets fps
     cv::Mat play();  // Returns next frame
     bool isPlaying() const;  // Returns true if opened
     cv::Mat skip(double secs);  // Skip frames according to secs

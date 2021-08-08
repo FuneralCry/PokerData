@@ -22,7 +22,7 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont, bool allow_f
     this->hand.clear();
     this->cont = cont;
     cv::Mat hud(frame(cont));
-    std::vector<pd::Obj> rects(pd::getBboxes(frame(cont)));
+    std::vector<pd::Obj> rects(pd::Models::getBboxes(frame(cont)));
     std::vector<std::pair<cv::Rect,std::vector<int>>> hand; // Contour of card and elements inside
     cv::Rect stack_cont;
     for(pd::Obj rect : rects)

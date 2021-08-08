@@ -15,3 +15,5 @@ build
 .vscode
 lib.a
 example.mp4
+extractHud.cpp
+vid.mp4

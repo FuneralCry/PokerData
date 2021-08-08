@@ -8,7 +8,7 @@ VideoPlayer::VideoPlayer(const std::string& path)
     this->duration = video.get(cv::CAP_PROP_FRAME_COUNT) / video.get(cv::CAP_PROP_FPS);
 }
 
-void VideoPlayer::setFps(int fps) { this->fps = fps; }
+void VideoPlayer::setFps(double fps) { this->fps = fps; }
 
 cv::Mat VideoPlayer::play()
 {

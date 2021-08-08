@@ -3,8 +3,23 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 #include "../headers/bboxes.h"
 
-std::vector<pd::Obj> pd::getBboxes(cv::Mat img)
+int pd::Models::addModel(cv::dnn::Net model)
 {
+    if(not models.size())
+        def = 0;
+    models.insert({models.size(),model});
+
+    return models.size()-1;
+}
+
+std::vector<pd::Obj> pd::Models::getBboxes(cv::Mat img, int key)
+{
+    if(key < 0)
+        key = def;
+
+    if(models.find(key) == models.end())
+        throw std::invalid_argument("Invalid key");
+
     double max,min;
     std::vector<std::vector<cv::Mat>> out;
     std::vector<cv::Rect> boxes;
@@ -16,11 +31,9 @@ std::vector<pd::Obj> pd::getBboxes(cv::Mat img)
     // Make image gray
     cv::cvtColor(img,img,cv::COLOR_BGR2GRAY);
     cv::cvtColor(img,img,cv::COLOR_GRAY2BGR);
-    // Initialize yolo
-    static cv::dnn::Net net(cv::dnn::readNetFromDarknet(PATH_TO_CFG,PATH_TO_WEIGHTS));
     // Create blob and push it through yolo
-    net.setInput(cv::dnn::blobFromImage(img,1.0/255.0,cv::Size(416,416),cv::Scalar(0,0),true,false));
-    net.forward(out,net.getUnconnectedOutLayersNames());
+    models[key].setInput(cv::dnn::blobFromImage(img,1.0/255.0,cv::Size(416,416),cv::Scalar(0,0),true,false));
+    models[key].forward(out,models[key].getUnconnectedOutLayersNames());
     // Collect results from all three yolo layers
     for(std::vector<cv::Mat> el : out)
     {
@@ -65,6 +78,14 @@ std::vector<pd::Obj> pd::getBboxes(cv::Mat img)
         res.push_back(std::make_pair(boxes[ind[i]],classes[ind[i]]));
 
     return res;
+}
+
+void pd::Models::setDefault(int key)
+{
+    if(key >= 0 and key < models.size())
+        def = key;
+    else
+        throw std::invalid_argument("Key out of range");
 }
 
 void pd::getNames(std::vector<std::string>& namesArray)

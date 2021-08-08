@@ -34,7 +34,7 @@ void pd::Observe::enumerate_players(std::vector<cv::Rect>& players) // Enumerate
 
 bool pd::Observe::isFirstFrame(cv::Mat frame)
 {
-    std::vector<pd::Obj> bboxes(pd::getBboxes(frame));
+    std::vector<pd::Obj> bboxes(pd::Models::getBboxes(frame));
     for(pd::Obj bbox : bboxes)
     {
         if(bbox.second == (int)pd::Indices::stake)
