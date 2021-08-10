@@ -16,6 +16,7 @@
 #include "video.h"
 #include "exception.h"
 #include "output.h"
+#include "human.h"
 #include "../Poker/headers/poker.h"
 
 #define NEW_GAME_TIME_LIMIT 3
@@ -46,6 +47,7 @@ namespace pd
         void eraseEliminated();
         // Finds nearest player to the Rect
         std::vector<pd::Player>::iterator whoseRect(cv::Rect);
+        void initPlayers();
 
         // Player's actions methods
 

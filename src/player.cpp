@@ -4,7 +4,7 @@
 #include "../headers/player.h"
 #include <boost/algorithm/string.hpp>
 
-pd::Player::Player(const cv::Mat& frame, const cv::Rect& cont, bool allow_fold)
+pd::Player::Player(const cv::Mat& frame, const cv::Rect& cont, bool allow_fold,std::string nickname) : nickname(nickname)
 {
     this->cont = cont;
     this->update(frame,cont,allow_fold);

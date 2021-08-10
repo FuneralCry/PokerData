@@ -82,3 +82,9 @@ std::vector<pd::Player>::iterator pd::Observe::whoseRect(cv::Rect rect)
 
     return min_player;
 }
+
+
+void pd::Observe::initPlayers()
+{
+    
+}

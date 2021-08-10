@@ -48,13 +48,32 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     this->center = (board.tl() + board.br()) / 2;
     // Sort players in clockwise order
     enumerate_players(players);
+    pd::createLogEntry("Please, enter players nickname manualy","INPUT",this->video->getTime());
     for(cv::Rect player : players)
-        this->players.push_back(pd::Player(frame,player,this->new_game_time >= NEW_GAME_TIME_LIMIT));
+        this->players.push_back(pd::Player(frame,player,this->new_game_time >= NEW_GAME_TIME_LIMIT,pd::askUser(frame(player))));
     // Order players from SB to BU
     if(not button.empty())
     {
         auto button_player(whoseRect(button));
         std::rotate(this->players.begin(),button_player+1,this->players.end());
+    }
+    else
+    {
+        cv::Mat copy_frame(frame);
+        for(int i(0); i < this->players.size(); ++i)
+        {
+            cv::rectangle(copy_frame,this->players[i].getCont(),cv::Scalar(255,35,145),2);
+            cv::putText(
+                copy_frame,
+                std::to_string(i),
+                (this->players[i].getCont().tl()+this->players[i].getCont().br())/2,
+                cv::FONT_HERSHEY_COMPLEX,
+                1,
+                cv::Scalar(0,0,255));
+        }
+        pd::createLogEntry("Can't find button. Please, enter button player number manualy","INPUT",this->video->getTime());
+        int button_num(std::stoi(pd::askUser(std::move(copy_frame))));
+        std::rotate(this->players.begin(),this->players.begin()+button_num,this->players.end());
     }
     // Create board
     this->board = new pd::Board(frame,board,this->event);
