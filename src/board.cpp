@@ -5,9 +5,8 @@
 
 namespace pd
 {
-    pd::Board::Board(const cv::Mat& frame, const cv::Rect& cont, pd::EventGuard& event)
+    pd::Board::Board(pd::OCR* ocr,const cv::Mat& frame, const cv::Rect& cont, pd::EventGuard& event) : ocr(ocr), cont(cont)
     {
-        this->cont = cont;
         this->update(frame,cont,event);
     }
 
@@ -30,7 +29,7 @@ namespace pd
 
     void Board::updatePot(cv::Mat&& pot_mat)
     {
-        std::string pot_str(pd::getText(std::move(pot_mat),pd::TextType::POT));
+        std::string pot_str(this->ocr->getText(std::move(pot_mat),pd::OCR::TextType::POT));
         boost::erase_all(pot_str,".");
         boost::erase_all(pot_str,",");
         std::regex r("\\d+");

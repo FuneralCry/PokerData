@@ -10,6 +10,7 @@
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
 #include <iostream>
+#include <map>
 
 #define WHITE_LIST "0123456789KM:.$, "
 #define BET_THR 220
@@ -22,24 +23,30 @@ namespace pd
 {
     namespace tess = tesseract;
 
-    enum class TextType
-    {
-        BET,
-        POT,
-        STACK
-    };
-
     class OCR
     {
     public:
-        tess::TessBaseAPI api;
+        enum class TextType
+        {
+            BET,
+            POT,
+            STACK
+        };
 
-        OCR();
+        OCR(cv::Mat&& pot_size,cv::Mat&& stake,cv::Mat&& stack);
         ~OCR();
-    };
 
-    std::string getText(cv::Mat&&,TextType&&);
-    void detectText(cv::Mat&, cv::Rect&);
+        std::string getText(cv::Mat&&,OCR::TextType&&);
+    private:
+        tess::TessBaseAPI api;
+        std::map<OCR::TextType,int> thr,dilate;
+        static int track_thr,track_dilate;
+
+        static void on_thr_trackbar(int,void*);
+        static void on_dilate_trackbar(int,void*);
+        static void updateFrame(cv::Mat*);
+        void adjustThr(cv::Mat&&,OCR::TextType) noexcept;
+    };
 }
 
 #endif

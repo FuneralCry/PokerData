@@ -6,62 +6,70 @@
 
 namespace pd
 {
-    pd::OCR::OCR()
+    int pd::OCR::track_dilate = 0;
+    int pd::OCR::track_thr = 0;
+
+    pd::OCR::OCR(cv::Mat&& pot_size, cv::Mat&& stake, cv::Mat&& stack)
     {
-        api.Init(NULL,"eng");
+        adjustThr(std::move(pot_size),pd::OCR::TextType::POT);
+        this->thr.insert({pd::OCR::TextType::POT,track_thr});
+        this->dilate.insert({pd::OCR::TextType::POT,track_dilate});
+        
+        adjustThr(std::move(stake),pd::OCR::TextType::BET);
+        this->thr.insert({pd::OCR::TextType::BET,track_thr});
+        this->dilate.insert({pd::OCR::TextType::BET,track_dilate});
+
+        adjustThr(std::move(stack),pd::OCR::TextType::STACK);
+        this->thr.insert({pd::OCR::TextType::STACK,track_thr});
+        this->dilate.insert({pd::OCR::TextType::STACK,track_dilate});
+
+        this->api.Init(NULL,"eng");
+        this->api.SetVariable("tessedit_char_whitelist",WHITE_LIST);
+        this->api.SetVariable("debug_file", "/dev/null");
+        this->api.SetPageSegMode(tess::PageSegMode::PSM_SINGLE_LINE);
     }
 
     pd::OCR::~OCR()
     {
-        api.End();
+        this->api.End();
     }
 
-    std::string getText(cv::Mat&& image, TextType&& type)
+    void pd::OCR::on_thr_trackbar(int pos, void* frames) { track_thr = pos; updateFrame(reinterpret_cast<cv::Mat*>(frames)); }
+    void pd::OCR::on_dilate_trackbar(int pos, void* frames) { track_dilate = pos; updateFrame(reinterpret_cast<cv::Mat*>(frames)); }
+
+    void pd::OCR::updateFrame(cv::Mat* frames)
     {
-        std::vector<std::vector<cv::Point>> contours;
-        int thr,kernel_size;
-        tess::PageSegMode psm(tess::PSM_SINGLE_LINE);
-        switch(type)
-        {
-            case TextType::STACK:
-                thr = STACK_THR;
-                kernel_size = 0;
-                psm = tess::PSM_SINGLE_LINE;
-                break;
-            case TextType::POT:
-                thr = POT_THR;
-                kernel_size = 0;
-                psm = tess::PSM_SINGLE_LINE;
-                break;
-            case TextType::BET:
-                thr = BET_THR;
-                kernel_size = 2;
-                psm = tess::PSM_SINGLE_BLOCK;
-                cv::Rect roi(0,std::max(0,image.rows-65),image.cols,std::min(65,image.rows));
-                image = image(roi);
-                break;
-        }
-        thr = 200;
+        cv::threshold(frames[0],frames[1],track_thr,255,cv::THRESH_BINARY);
+        auto kernel(cv::getStructuringElement(cv::MORPH_RECT,cv::Size(2*track_dilate+1,2*track_dilate+1),cv::Point(track_dilate,track_dilate)));
+        cv::dilate(frames[1],frames[1],kernel);
+        cv::imshow("Adjust image",frames[1]);
+    }
+
+    void pd::OCR::adjustThr(cv::Mat&& frame, OCR::TextType type) noexcept
+    {
+        cv::cvtColor(frame,frame,cv::COLOR_BGR2GRAY);
+        cv::namedWindow("Adjust image");
+        cv::Mat origin_filtered[2];
+        origin_filtered[0] = frame;
+        cv::createTrackbar("Threshold","Adjust image",NULL,255,on_thr_trackbar,&origin_filtered);
+        cv::createTrackbar("Dilation","Adjust image",NULL,255,on_dilate_trackbar,&origin_filtered);
+        cv::imshow("Adjust image",frame);
+        cv::waitKey(0);
+        cv::destroyWindow("Adjust image");
+    }
+
+    std::string pd::OCR::getText(cv::Mat&& image, OCR::TextType&& type)
+    {
         cv::cvtColor(image,image,cv::COLOR_BGR2GRAY);
         cv::cvtColor(image,image,cv::COLOR_GRAY2RGBA);
-        image.convertTo(image,-1,1,50);
-        cv::imwrite("bet1.jpg",image);
         cv::resize(image,image,cv::Size(),2,2);
-        cv::threshold(image,image,thr,255,cv::THRESH_BINARY);
-        auto kernel(cv::getStructuringElement(cv::MORPH_RECT,cv::Size(2*kernel_size+1,2*kernel_size+1),cv::Point(kernel_size,kernel_size)));
-        cv::morphologyEx(image,image,cv::MORPH_OPEN,kernel,cv::Point(-1,-1));
-        kernel_size = 1;
-        kernel = cv::getStructuringElement(cv::MORPH_RECT,cv::Size(2*kernel_size+1,2*kernel_size+1),cv::Point(kernel_size,kernel_size));
-        cv::erode(image,image,kernel);
+        cv::threshold(image,image,this->thr[type],255,cv::THRESH_BINARY);
+        auto kernel(cv::getStructuringElement(cv::MORPH_RECT,cv::Size(2*this->dilate[type]+1,2*this->dilate[type]+1),cv::Point(this->dilate[type],this->dilate[type])));
+        cv::dilate(image,image,kernel);
         cv::bitwise_not(image,image);
-        
-        
-        static pd::OCR ocr;
-        ocr.api.SetImage(image.data,image.cols,image.rows,4,4*image.cols);
-        ocr.api.SetVariable("tessedit_char_whitelist",WHITE_LIST);
-        ocr.api.SetVariable("debug_file", "/dev/null");
-        ocr.api.SetPageSegMode(psm);
-        char* textc(ocr.api.GetUTF8Text());
+
+        this->api.SetImage(image.data,image.cols,image.rows,4,4*image.cols);
+        char* textc(this->api.GetUTF8Text());
         std::string text(textc);
         cv::imwrite("1.jpg",image);
         delete[] textc;

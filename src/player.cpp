@@ -4,9 +4,8 @@
 #include "../headers/player.h"
 #include <boost/algorithm/string.hpp>
 
-pd::Player::Player(const cv::Mat& frame, const cv::Rect& cont, bool allow_fold,std::string nickname) : nickname(nickname)
+pd::Player::Player(pd::OCR* ocr, const cv::Mat& frame, const cv::Rect& cont, bool allow_fold,std::string nickname) : nickname(nickname), cont(cont), ocr(ocr)
 {
-    this->cont = cont;
     this->update(frame,cont,allow_fold);
 }
 
@@ -49,7 +48,7 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont, bool allow_f
     else
         this->folded = true;
 
-    std::string stack_str(pd::getText(hud(stack_cont),pd::TextType::STACK)),stack_d;
+    std::string stack_str(this->ocr->getText(hud(stack_cont),pd::OCR::TextType::STACK)),stack_d;
     boost::erase_all(stack_str," ");
     std::regex dollar("\\$?\\d+[.,]\\d+[MK]");
     std::smatch res_d;

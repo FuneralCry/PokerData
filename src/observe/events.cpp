@@ -1,10 +1,11 @@
 #include "../../headers/observe.h"
 
+std::string bool2string(bool val) { return val ? "true" : "false"; }
 
 void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
 {
     this->new_game_time += (double)1/(double)this->fps;
-    pd::createLogEntry("Forcibly complete new game fase on this iteration: " + std::to_string(this->new_game_time >= NEW_GAME_TIME_LIMIT),
+    pd::createLogEntry("Forcibly complete new game fase on this iteration: " + bool2string(this->new_game_time >= NEW_GAME_TIME_LIMIT),
         "INFO", this->video->getTime());
     // Get current frame
     cv::Mat frame(video->get());

@@ -3,7 +3,7 @@
 void pd::Observe::playerBet(std::vector<pd::Player>::iterator player,cv::Mat&& stake)
 {
     // Read bet size string from image
-    std::string bet_size_str(pd::getText(std::move(stake),TextType::BET));
+    std::string bet_size_str(this->ocr->getText(std::move(stake),pd::OCR::TextType::BET));
     //  Clear it and extract digits
     boost::erase_all(bet_size_str,",");
     boost::erase_all(bet_size_str,".");

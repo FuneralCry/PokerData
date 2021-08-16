@@ -19,6 +19,7 @@ namespace pd
     class Player
     {
     private:
+        pd::OCR* ocr;
         cv::Rect cont;
         std::vector<pd::Card> hand;
         std::string nickname;
@@ -27,7 +28,7 @@ namespace pd
         bool active{false};
         bool folded;
 
-        Player(const cv::Mat& frame, const cv::Rect& cont,bool allow_fold,std::string nickname);
+        Player(pd::OCR* ocr,const cv::Mat& frame,const cv::Rect& cont,bool allow_fold,std::string nickname);
         void update(const cv::Mat& frame, const cv::Rect& cont,bool allow_fold);
         cv::Rect getCont() const;
         std::string status() const;

@@ -28,6 +28,7 @@ namespace pd
     private:
         int fps;
         double new_game_time{0};
+        pd::OCR* ocr;  // OCR engine 
         pkr::Game* game;  // Poker engine
         std::vector<pd::Player> players; // Players container
         pd::Board* board;  // Board class

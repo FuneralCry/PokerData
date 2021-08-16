@@ -26,7 +26,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     // Set user fps
     this->video->setFps(fps);
     std::vector<cv::Rect> players;
-    cv::Rect button,board;
+    cv::Rect button,board,stake,hud,pot_size;
     // Find all informative objects to initialize game
     std::vector<pd::Obj> bboxes(pd::Models::getBboxes(frame));
     for(pd::Obj bbox : bboxes)
@@ -35,6 +35,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
         {
             case (int)pd::Indices::hud:
                 players.push_back(bbox.first);
+                hud = bbox.first;
                 break;
             case (int)pd::Indices::button:
                 button = bbox.first;
@@ -42,15 +43,23 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
             case (int)pd::Indices::board:
                 board = bbox.first;
                 break;
+            case (int)pd::Indices::stake:
+                stake = bbox.first;
+                break;
+            case (int)pd::Indices::pot_size:
+                pot_size = bbox.first;
+                break;
         }
     }
+    pd::createLogEntry("Please, adjust filters for all text blocks. Adjust parameters until text on the pictures becomes readable. Press any key to apply.","MANUAL",this->video->getTime());
+    this->ocr = new pd::OCR(frame(pot_size),frame(stake),frame(hud));
     // Specifying center
     this->center = (board.tl() + board.br()) / 2;
     // Sort players in clockwise order
     enumerate_players(players);
-    pd::createLogEntry("Please, enter players nickname manualy","INPUT",this->video->getTime());
+    pd::createLogEntry("Please, enter players nickname manualy","MANUAL",this->video->getTime());
     for(cv::Rect player : players)
-        this->players.push_back(pd::Player(frame,player,this->new_game_time >= NEW_GAME_TIME_LIMIT,pd::askUser(frame(player))));
+        this->players.push_back(pd::Player(ocr,frame,player,this->new_game_time >= NEW_GAME_TIME_LIMIT,pd::askUser(frame(player))));
     // Order players from SB to BU
     if(not button.empty())
     {
@@ -76,7 +85,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
         std::rotate(this->players.begin(),this->players.begin()+button_num,this->players.end());
     }
     // Create board
-    this->board = new pd::Board(frame,board,this->event);
+    this->board = new pd::Board(ocr,frame,board,this->event);
     // Create game
     std::vector<pkr::Player> pkr_players;
     std::vector<pkr::Card> pkr_board(*this->board);

@@ -23,13 +23,14 @@ namespace pd
     class Board
     {
     private:
+        pd::OCR* ocr;
         cv::Rect cont;
         std::vector<pd::Card> cards;
         cv::Rect pot_size_cont;
         long long pot_size{NULL};
     public:
         Board() = delete;
-        Board(const cv::Mat& frame,const cv::Rect& cont,pd::EventGuard&);
+        Board(pd::OCR* ocr,const cv::Mat& frame,const cv::Rect& cont,pd::EventGuard&);
         void update(const cv::Mat& frame,const cv::Rect& cont,pd::EventGuard&);
         void updatePot(cv::Mat&&);
         std::vector<pd::Card> getCards() const;
