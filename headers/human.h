@@ -10,7 +10,14 @@
 
 namespace pd
 {
-    std::string askUser(cv::Mat&&);
+    class Human
+    {
+    private:
+        static std::string getstring();
+    public:
+        static WINDOW* win;
+        static std::string askUser(cv::Mat&&);
+    };
 }
 
 #endif

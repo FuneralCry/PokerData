@@ -1,6 +1,8 @@
 #include "../headers/human.h"
 
-std::string getstring()
+WINDOW* pd::Human::win = nullptr;
+
+std::string pd::Human::getstring()
 {
     std::string input;
     // let the terminal do the line editing
@@ -8,24 +10,26 @@ std::string getstring()
     echo();
     // this reads from buffer after <ENTER>, not "raw" 
     // so any backspacing etc. has already been taken care of
-    int ch = getch();
+    int ch = wgetch(win);
     while ( ch != '\n' )
     {
         input.push_back( ch );
-        ch = getch();
+        ch = wgetch(win);
     }
     return input;
 }
 
-std::string pd::askUser(cv::Mat&& img)
+std::string pd::Human::askUser(cv::Mat&& img)
 {
+    if(win == nullptr)
+        throw std::invalid_argument("WINDOW hasn't been initialized");
     if(stdscr == nullptr)
         initscr();
     std::string win_name("Help request");
     cv::namedWindow(win_name);
     cv::imshow(win_name,img);
     cv::waitKey(1000);
-    printw("> ");
+    wprintw(win,"> ");
     std::string input(getstring());
     cv::destroyWindow(win_name);
     

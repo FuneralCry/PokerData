@@ -11,8 +11,11 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     this->start_time = std::chrono::system_clock::now();
     // Cut intro
     video = new VideoPlayer(path);
+    this->markupTerminal(0.8);
     Logger::timer = video;
-    this->progress = new pd::ProgressBar(video);
+    Logger::win = this->log_win;
+    pd::Human::win = this->log_win;
+    this->progress = new pd::ProgressBar(video,this->progress_win);
     this->progress->update();
     cv::Mat frame;
     this->video->setFps(1);
@@ -60,7 +63,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     enumerate_players(players);
     pd::Logger::createLogEntry("Please, enter players nickname manualy","MANUAL");
     for(cv::Rect player : players)
-        this->players.push_back(pd::Player(ocr,frame,player,this->new_game_time >= NEW_GAME_TIME_LIMIT,pd::askUser(frame(player))));
+        this->players.push_back(pd::Player(ocr,frame,player,this->new_game_time >= NEW_GAME_TIME_LIMIT,pd::Human::askUser(frame(player))));
     // Order players from SB to BU
     if(not button.empty())
     {
@@ -82,7 +85,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
                 cv::Scalar(0,0,255));
         }
         pd::Logger::createLogEntry("Can't find button. Please, enter button player number manualy","INPUT");
-        int button_num(std::stoi(pd::askUser(std::move(copy_frame))));
+        int button_num(std::stoi(pd::Human::askUser(std::move(copy_frame))));
         std::rotate(this->players.begin(),this->players.begin()+button_num,this->players.end());
     }
     // Create board

@@ -83,8 +83,17 @@ std::vector<pd::Player>::iterator pd::Observe::whoseRect(cv::Rect rect)
     return min_player;
 }
 
-
-void pd::Observe::initPlayers()
+void pd::Observe::markupTerminal(double ratio)
 {
-    
+    int right_margin(1),left_margin(1);
+    int log_rows(LINES*ratio);
+    int progress_rows(LINES-log_rows);
+    int cols(COLS-right_margin-left_margin);
+    this->log_win = newwin(log_rows,cols,0,left_margin);
+    this->progress_win = newwin(progress_rows,cols,log_rows,left_margin);
+    box(this->log_win,0,0);
+    box(this->progress_win,0,0);
+    scrollok(this->log_win,true);
+    wrefresh(this->log_win);
+    wrefresh(this->progress_win);
 }

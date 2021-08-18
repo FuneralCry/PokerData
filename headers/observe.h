@@ -38,6 +38,7 @@ namespace pd
         pd::EventGuard event;
         pd::ProgressBar* progress;
         std::chrono::time_point<std::chrono::system_clock> start_time;
+        WINDOW* progress_win,*log_win;
 
         // Misc
 
@@ -49,7 +50,7 @@ namespace pd
         void eraseEliminated();
         // Finds nearest player to the Rect
         std::vector<pd::Player>::iterator whoseRect(cv::Rect);
-        void initPlayers();
+        void markupTerminal(double ratio);
 
         // Player's actions methods
 

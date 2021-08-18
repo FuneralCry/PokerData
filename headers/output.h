@@ -14,6 +14,7 @@ namespace pd
     {
     public:
         static Timer* timer;
+        static WINDOW* win;
         static void createLogEntry(std::string message,std::string tag);
     };
 
@@ -23,7 +24,7 @@ namespace pd
         static WINDOW* win;
         static VideoPlayer* video;
     public:
-        ProgressBar(VideoPlayer*);
+        ProgressBar(VideoPlayer*,WINDOW*);
         void update();
     };
 }
