@@ -9,8 +9,9 @@
 #include <opencv2/dnn/dnn.hpp>
 #include <iostream>
 #include <stdexcept>
+#include "timer.h"
 
-class VideoPlayer
+class VideoPlayer : public Timer
 {
 private:
     cv::VideoCapture video;
@@ -27,7 +28,7 @@ public:
     cv::Mat skip(double secs);  // Skip frames according to secs
     cv::Mat get() const;  // Returns current frame
     long getDuration() const;
-    long getTime() const;
+    long getTime() const override;
 };
 
 #endif

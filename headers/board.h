@@ -24,9 +24,8 @@ namespace pd
     {
     private:
         pd::OCR* ocr;
-        cv::Rect cont;
+        cv::Rect cont,pot_size_cont;
         std::vector<pd::Card> cards;
-        cv::Rect pot_size_cont;
         long long pot_size{NULL};
     public:
         Board() = delete;

@@ -8,6 +8,7 @@ namespace pd
 {
     int pd::OCR::track_dilate = 0;
     int pd::OCR::track_thr = 0;
+    std::string pd::OCR::adj_win_name = "Adjust image";
 
     pd::OCR::OCR(cv::Mat&& pot_size, cv::Mat&& stake, cv::Mat&& stack)
     {
@@ -42,20 +43,20 @@ namespace pd
         cv::threshold(frames[0],frames[1],track_thr,255,cv::THRESH_BINARY);
         auto kernel(cv::getStructuringElement(cv::MORPH_RECT,cv::Size(2*track_dilate+1,2*track_dilate+1),cv::Point(track_dilate,track_dilate)));
         cv::dilate(frames[1],frames[1],kernel);
-        cv::imshow("Adjust image",frames[1]);
+        cv::imshow(adj_win_name,frames[1]);
     }
 
     void pd::OCR::adjustThr(cv::Mat&& frame, OCR::TextType type) noexcept
     {
         cv::cvtColor(frame,frame,cv::COLOR_BGR2GRAY);
-        cv::namedWindow("Adjust image");
+        cv::namedWindow(this->adj_win_name);
         cv::Mat origin_filtered[2];
         origin_filtered[0] = frame;
-        cv::createTrackbar("Threshold","Adjust image",NULL,255,on_thr_trackbar,&origin_filtered);
-        cv::createTrackbar("Dilation","Adjust image",NULL,255,on_dilate_trackbar,&origin_filtered);
-        cv::imshow("Adjust image",frame);
+        cv::createTrackbar("Threshold",this->adj_win_name,NULL,255,on_thr_trackbar,&origin_filtered);
+        cv::createTrackbar("Dilation",this->adj_win_name,NULL,255,on_dilate_trackbar,&origin_filtered);
+        cv::imshow(this->adj_win_name,frame);
         cv::waitKey(0);
-        cv::destroyWindow("Adjust image");
+        cv::destroyWindow(this->adj_win_name);
     }
 
     std::string pd::OCR::getText(cv::Mat&& image, OCR::TextType&& type)

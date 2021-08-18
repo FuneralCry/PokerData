@@ -9,6 +9,7 @@
 #include <numeric>
 #include <limits>
 #include <regex>
+#include <stdlib.h>
 #include "bboxes.h"
 #include "player.h"
 #include "board.h"

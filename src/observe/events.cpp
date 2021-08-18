@@ -5,11 +5,11 @@ std::string bool2string(bool val) { return val ? "true" : "false"; }
 void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
 {
     this->new_game_time += (double)1/(double)this->fps;
-    pd::createLogEntry("Forcibly complete new game fase on this iteration: " + bool2string(this->new_game_time >= NEW_GAME_TIME_LIMIT),
-        "INFO", this->video->getTime());
+    pd::Logger::createLogEntry("Forcibly complete new game fase on this iteration: " + bool2string(this->new_game_time >= NEW_GAME_TIME_LIMIT),
+        "INFO");
     // Get current frame
     cv::Mat frame(video->get());
-    pd::createLogEntry("Updating players...", "INFO", this->video->getTime());
+    pd::Logger::createLogEntry("Updating players...", "INFO");
     for(cv::Rect rect : players)
     {
         // Find player according to rect
@@ -18,7 +18,7 @@ void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
         {
             // Update it
             p->update(frame,rect,this->new_game_time >= NEW_GAME_TIME_LIMIT);
-            pd::createLogEntry(p->status(),"INFO", this->video->getTime());
+            pd::Logger::createLogEntry(p->status(),"INFO");
         }
         else
             throw std::invalid_argument("Can't find player according to rect");
@@ -68,8 +68,8 @@ void pd::Observe::event_NEW_BOARD_CARD()
         default:
             throw std::invalid_argument("Invalid state");
     }
-    pd::createLogEntry("Current state now is: " + pkr::SatesOut[this->state], "INFO", this->video->getTime());
-    pd::createLogEntry("Board: " + this->game->getBoard(), "INFO", this->video->getTime());
+    pd::Logger::createLogEntry("Current state now is: " + pkr::SatesOut[this->state], "INFO");
+    pd::Logger::createLogEntry("Board: " + this->game->getBoard(), "INFO");
     // Event is NU now
     this->event.reset();
 }

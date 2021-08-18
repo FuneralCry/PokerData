@@ -6,12 +6,16 @@
 #include <ctime>
 #include <boost/algorithm/string.hpp>
 #include "video.h"
+#include "timer.h"
 
 namespace pd
 {
-    std::string tohhmmss(long seconds);
-
-    void createLogEntry(std::string message,std::string tag,long time);
+    class Logger
+    {
+    public:
+        static Timer* timer;
+        static void createLogEntry(std::string message,std::string tag);
+    };
 
     class ProgressBar
     {

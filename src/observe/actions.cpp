@@ -15,7 +15,7 @@ void pd::Observe::playerBet(std::vector<pd::Player>::iterator player,cv::Mat&& s
         bet_size = std::stoll(m[0].str());
     }
     else
-        throw pd::bad_text_recognition("pd::Observe::playerBet()");
+        throw pd::bad_recognition("pd::Observe::playerBet()");
     // Trigger game
     this->game->playerAction(std::distance(this->players.begin(),player),pkr::bet,bet_size);
 }

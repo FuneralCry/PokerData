@@ -13,11 +13,6 @@
 #include <map>
 
 #define WHITE_LIST "0123456789KM:.$, "
-#define BET_THR 220
-#define POT_THR 200
-#define STACK_THR 100
-#define CONF_THR 0.5
-#define NMS_THR 0.4
 
 namespace pd
 {
@@ -38,6 +33,7 @@ namespace pd
 
         std::string getText(cv::Mat&&,OCR::TextType&&);
     private:
+        static std::string adj_win_name;
         tess::TessBaseAPI api;
         std::map<OCR::TextType,int> thr,dilate;
         static int track_thr,track_dilate;

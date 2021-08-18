@@ -11,6 +11,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     this->start_time = std::chrono::system_clock::now();
     // Cut intro
     video = new VideoPlayer(path);
+    Logger::timer = video;
     this->progress = new pd::ProgressBar(video);
     this->progress->update();
     cv::Mat frame;
@@ -51,13 +52,13 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
                 break;
         }
     }
-    pd::createLogEntry("Please, adjust filters for all text blocks. Adjust parameters until text on the pictures becomes readable. Press any key to apply.","MANUAL",this->video->getTime());
+    pd::Logger::createLogEntry("Please, adjust filters for all text blocks. Adjust parameters until text on the pictures becomes readable. Press any key to apply.","MANUAL");
     this->ocr = new pd::OCR(frame(pot_size),frame(stake),frame(hud));
     // Specifying center
     this->center = (board.tl() + board.br()) / 2;
     // Sort players in clockwise order
     enumerate_players(players);
-    pd::createLogEntry("Please, enter players nickname manualy","MANUAL",this->video->getTime());
+    pd::Logger::createLogEntry("Please, enter players nickname manualy","MANUAL");
     for(cv::Rect player : players)
         this->players.push_back(pd::Player(ocr,frame,player,this->new_game_time >= NEW_GAME_TIME_LIMIT,pd::askUser(frame(player))));
     // Order players from SB to BU
@@ -80,7 +81,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
                 1,
                 cv::Scalar(0,0,255));
         }
-        pd::createLogEntry("Can't find button. Please, enter button player number manualy","INPUT",this->video->getTime());
+        pd::Logger::createLogEntry("Can't find button. Please, enter button player number manualy","INPUT");
         int button_num(std::stoi(pd::askUser(std::move(copy_frame))));
         std::rotate(this->players.begin(),this->players.begin()+button_num,this->players.end());
     }
@@ -93,7 +94,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
         pkr_players.push_back(p);
     this->game = new pkr::Game(pkr_players,pkr_board);
     this->state = this->game->getState();
-    pd::createLogEntry("Start up has been finished. Current state is: " + pkr::SatesOut[this->state], "INFO",this->video->getTime());
+    pd::Logger::createLogEntry("Start up has been finished. Current state is: " + pkr::SatesOut[this->state], "INFO");
 }
 
 void pd::Observe::start()
@@ -162,11 +163,12 @@ void pd::Observe::start()
         }
         catch(pd::InterimFrame& ex)
         {
-            pd::createLogEntry(ex.what(),"WARNING",this->video->getTime());
+            pd::Logger::createLogEntry(ex.what(),"WARNING");
         }
         catch(std::exception& ex)
         {
-            pd::createLogEntry(ex.what(),"ERROR",this->video->getTime());
+            pd::Logger::createLogEntry(ex.what(),"CRITICAL");
+            exit(EXIT_FAILURE);
         }
     }
 }

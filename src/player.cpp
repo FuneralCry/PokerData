@@ -11,7 +11,7 @@ pd::Player::Player(pd::OCR* ocr, const cv::Mat& frame, const cv::Rect& cont, boo
 
 pd::Player::operator pkr::Player() const
 {
-    return pkr::Player(std::make_pair(this->hand[0],this->hand[1]),this->stack);
+    return pkr::Player(std::make_pair(this->hand[0],this->hand[1]),this->stack,this->nickname);
 }
 
 void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont, bool allow_fold)
@@ -55,7 +55,7 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont, bool allow_f
     if(std::regex_search(stack_str,res_d,dollar))
         stack_d = res_d[0].str().substr(1,res_d[0].str().length()-1);
     else
-        throw pd::bad_text_recognition("void pd::Player::update(...)");
+        throw pd::bad_recognition("void pd::Player::update(...)");
     long long mult;
     if(*stack_d.rbegin() == 'K')
         mult = 1000;
