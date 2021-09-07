@@ -16,7 +16,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     Logger::timer = video;
     Logger::win = this->log_win;
     pd::Human::win = this->log_win;
-    this->progress = new pd::ProgressBar(video,this->progress_win);
+    this->progress = new pd::ProgressBar(video,this->progress_win,video->getDuration());
     this->progress->update();
     cv::Mat frame;
     this->video->setFps(1);

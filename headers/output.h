@@ -22,9 +22,10 @@ namespace pd
     {
     private:
         static WINDOW* win;
-        static VideoPlayer* video;
+        static Timer* timer;
+        static long max_time;
     public:
-        ProgressBar(VideoPlayer*,WINDOW*);
+        ProgressBar(Timer*,WINDOW*,long max_time);
         void update();
     };
 }
