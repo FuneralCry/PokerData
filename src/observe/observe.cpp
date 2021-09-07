@@ -6,6 +6,7 @@
 pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
 {
     initscr();
+    this->output.open("lol",std::fstream::in | std::fstream::trunc | std::fstream::out);
     pd::Models::addModel(cv::dnn::readNetFromDarknet(PATH_TO_CFG,PATH_TO_WEIGHTS));
     scrollok(stdscr,true);
     this->start_time = std::chrono::system_clock::now();
@@ -63,12 +64,14 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     enumerate_players(players);
     pd::Logger::createLogEntry("Please, enter players nickname manualy","MANUAL");
     for(cv::Rect player : players)
-        this->players.push_back(pd::Player(ocr,frame,player,this->new_game_time >= NEW_GAME_TIME_LIMIT,pd::Human::askUser(frame(player))));
+        this->players.push_back(pd::Player(ocr,frame,player,true,pd::Human::askUser(frame(player)))); // pd::Human::askUser(frame(player))
+    // Create board
+    this->board = new pd::Board(ocr,frame,board,this->event);
     // Order players from SB to BU
     if(not button.empty())
     {
         auto button_player(whoseRect(button));
-        std::rotate(this->players.begin(),button_player+1,this->players.end());
+        std::rotate(this->players.begin(),++button_player,this->players.end());
     }
     else
     {
@@ -88,8 +91,6 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
         int button_num(std::stoi(pd::Human::askUser(std::move(copy_frame))));
         std::rotate(this->players.begin(),this->players.begin()+button_num,this->players.end());
     }
-    // Create board
-    this->board = new pd::Board(ocr,frame,board,this->event);
     // Create game
     std::vector<pkr::Player> pkr_players;
     std::vector<pkr::Card> pkr_board(*this->board);

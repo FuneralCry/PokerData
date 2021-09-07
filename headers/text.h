@@ -11,6 +11,7 @@
 #include <leptonica/allheaders.h>
 #include <iostream>
 #include <map>
+#include "bboxes.h"
 
 #define WHITE_LIST "0123456789KM:.$, "
 
@@ -37,6 +38,10 @@ namespace pd
         tess::TessBaseAPI api;
         std::map<OCR::TextType,int> thr,dilate;
         static int track_thr,track_dilate;
+        int model_num;
+
+        std::string useYolo(const cv::Mat&);
+        std::string useTesseract(const cv::Mat&);
 
         static void on_thr_trackbar(int,void*);
         static void on_dilate_trackbar(int,void*);

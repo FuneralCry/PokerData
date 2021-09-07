@@ -10,6 +10,7 @@
 #include <limits>
 #include <regex>
 #include <stdlib.h>
+#include <fstream>
 #include "bboxes.h"
 #include "player.h"
 #include "board.h"
@@ -39,6 +40,7 @@ namespace pd
         pd::ProgressBar* progress;
         std::chrono::time_point<std::chrono::system_clock> start_time;
         WINDOW* progress_win,*log_win;
+        std::fstream output;
 
         // Misc
 
@@ -55,9 +57,11 @@ namespace pd
         // Player's actions methods
 
         // Reaction on a player's bet
-        void playerBet(std::vector<pd::Player>::iterator player,cv::Mat&& stake);
+        void playerBet(int player,cv::Mat&& stake);
         // Searchs for folded players
         void checkFolded();
+        // Associate player number with stake rect
+        std::vector<std::pair<int,cv::Rect>> linkPlayers2Stakes(std::vector<cv::Rect> stakes);
         // Extract useful information from all stakes bboxes
         void processStakes(std::vector<cv::Rect> stakes);
 

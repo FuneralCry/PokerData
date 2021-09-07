@@ -1,1 +1,2 @@
 res/yolo/model.weights filter=lfs diff=lfs merge=lfs -text
+res/yolo/model_digits.weights filter=lfs diff=lfs merge=lfs -text

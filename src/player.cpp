@@ -11,7 +11,10 @@ pd::Player::Player(pd::OCR* ocr, const cv::Mat& frame, const cv::Rect& cont, boo
 
 pd::Player::operator pkr::Player() const
 {
-    return pkr::Player(std::make_pair(this->hand[0],this->hand[1]),this->stack,this->nickname);
+    if(not hand.empty())
+        return pkr::Player(std::make_pair(this->hand[0],this->hand[1]),this->stack,this->nickname);
+    else
+        return pkr::Player(this->nickname);
 }
 
 void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont, bool allow_fold)
@@ -31,6 +34,7 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont, bool allow_f
         if(rect.second == (int)pd::Indices::stack)
             stack_cont = rect.first;
     }
+    cv::imwrite("player.jpg",frame);
     if(hand.size() != 2 and not allow_fold)
         throw pd::InterimFrame("void pd::Player::update(...)");
     if(hand.size())

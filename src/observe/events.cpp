@@ -31,11 +31,11 @@ void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
     // Create new players
     for(pd::Player player : this->players)
         pkr_players.push_back(player);
-    // After processing image and casting players without errors we can switch event to NU
+    // After processing frame and casting players without errors we can switch event to NU
     this->event.reset();
     // Reset state
     this->state = 0;
-    //createLogEntry(*game,"");
+    this->output << *game << std::endl;
     // Delete old game and create new
     delete this->game;
     this->game = new pkr::Game(pkr_players,std::vector<pkr::Card>());

@@ -17,3 +17,5 @@ lib.a
 example.mp4
 extractHud.cpp
 vid.mp4
+voc.data
+dig.data

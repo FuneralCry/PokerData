@@ -1,13 +1,14 @@
 #include "../../headers/observe.h"
 
-void pd::Observe::playerBet(std::vector<pd::Player>::iterator player,cv::Mat&& stake)
+void pd::Observe::playerBet(int player_num, cv::Mat&& stake)
 {
-    // Read bet size string from image
+    cv::imwrite("bett.jpg",stake);
+    // Read bet size string from frame
     std::string bet_size_str(this->ocr->getText(std::move(stake),pd::OCR::TextType::BET));
     //  Clear it and extract digits
     boost::erase_all(bet_size_str,",");
     boost::erase_all(bet_size_str,".");
-    std::regex r("\\d{6,}");
+    std::regex r("\\d+");
     std::smatch m;
     long long bet_size;
     if(std::regex_search(bet_size_str,m,r))
@@ -17,7 +18,8 @@ void pd::Observe::playerBet(std::vector<pd::Player>::iterator player,cv::Mat&& s
     else
         throw pd::bad_recognition("pd::Observe::playerBet()");
     // Trigger game
-    this->game->playerAction(std::distance(this->players.begin(),player),pkr::bet,bet_size);
+    this->game->playerAction(player_num,pkr::bet,bet_size);
+    pd::Logger::createLogEntry(m[0].str(),"BET");
 }
 
 void pd::Observe::checkFolded()
@@ -29,6 +31,21 @@ void pd::Observe::checkFolded()
     }
 }
 
+std::vector<std::pair<int,cv::Rect>> pd::Observe::linkPlayers2Stakes(std::vector<cv::Rect> stakes)
+{
+    std::vector<std::pair<int,cv::Rect>> res;
+    for(cv::Rect& s : stakes)
+    {
+        auto p(whoseRect(s));
+        if(p == this->players.end())
+            res.push_back(std::make_pair(-1,s));
+        else
+            res.push_back(std::make_pair(std::distance(this->players.begin(),p),s));
+    }
+
+    return res;
+}
+
 void pd::Observe::processStakes(std::vector<cv::Rect> stakes)
 {
     // Get current frame
@@ -36,14 +53,15 @@ void pd::Observe::processStakes(std::vector<cv::Rect> stakes)
     // If 'stake' in the middle (pot actually) has gone, then game is over and there is nothing to do
     if(std::none_of(stakes.begin(),stakes.end(),[&](cv::Rect r) { return isIntersects(this->board->getCont(),r); }))
         return;
-    // Else trigger game by all stakes except one in the middle (game resolves multiple stakes by itself)
-    for(cv::Rect rect : stakes)
+    // Find owner of each stake
+    std::vector<std::pair<int,cv::Rect>> pn_stakes(linkPlayers2Stakes(stakes));
+    std::sort(pn_stakes.begin(),pn_stakes.end(),[](auto& a, auto& b) { return a.first < b.first; });
+    for(auto& p : pn_stakes)
     {
-        // Find owner of stake
-        auto p(whoseRect(rect));
         // If it is not in the middle
-        if(p != this->players.end())
-            // Trigger game
-            playerBet(p,frame(rect));
+        if(p.first >= 0)
+            if(this->game->actAllowed(p.first))
+                // Trigger game
+                playerBet(p.first,frame(p.second));
     }
 }

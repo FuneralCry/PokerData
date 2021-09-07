@@ -37,6 +37,7 @@ namespace pd
         if(std::regex_search(pot_str,m,r))
             pot_str = m[0].str();
         this->pot_size = std::stoll(pot_str);
+        pd::Logger::createLogEntry(m[0].str(),"POT");
     }
 
     void Board::update(const cv::Mat& frame, const cv::Rect& cont, pd::EventGuard& event)
