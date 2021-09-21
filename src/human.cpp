@@ -1,37 +1,17 @@
 #include "../headers/human.h"
 
-WINDOW* pd::Human::win = nullptr;
-
-std::string pd::Human::getstring()
+namespace pd
 {
-    std::string input;
-    // let the terminal do the line editing
-    nocbreak();
-    echo();
-    // this reads from buffer after <ENTER>, not "raw" 
-    // so any backspacing etc. has already been taken care of
-    int ch = wgetch(win);
-    while ( ch != '\n' )
+    std::string askUser(const cv::Mat& img, std::string_view message)
     {
-        input.push_back( ch );
-        ch = wgetch(win);
+        pd::Logger::createLogEntry(static_cast<std::string>(message),"MANUAL");
+        std::string win_name("Help request");
+        cv::namedWindow(win_name);
+        cv::imshow(win_name,img);
+        cv::waitKey(1000);
+        std::string input(pd::Logger::requestInput(">> "));
+        cv::destroyWindow(win_name);
+        
+        return input;
     }
-    return input;
-}
-
-std::string pd::Human::askUser(cv::Mat&& img)
-{
-    if(win == nullptr)
-        throw std::invalid_argument("WINDOW hasn't been initialized");
-    if(stdscr == nullptr)
-        initscr();
-    std::string win_name("Help request");
-    cv::namedWindow(win_name);
-    cv::imshow(win_name,img);
-    cv::waitKey(1000);
-    wprintw(win,"> ");
-    std::string input(getstring());
-    cv::destroyWindow(win_name);
-    
-    return input;
 }

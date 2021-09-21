@@ -12,7 +12,6 @@
 
 int main()
 {
-
     std::string path(VIDEO_PATH);
     pd::Observe obs(path,FPS);
     obs.start();

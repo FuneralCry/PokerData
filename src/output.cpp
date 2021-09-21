@@ -34,13 +34,43 @@ void pd::ProgressBar::update()
     wrefresh(this->win);
 }
 
+void pd::Logger::init(WINDOW* _win, Timer* _timer)
+{
+    win = _win;
+    timer = _timer;
+}
+
 void pd::Logger::createLogEntry(std::string message, std::string tag)
 {
-    if(win == nullptr)
-        throw std::invalid_argument("WINDOW hasn't been initialized");
-    if(timer == nullptr)
-        throw std::invalid_argument("Timer* hasn't been initialized");
+    if(win == nullptr or timer == nullptr)
+        throw std::invalid_argument("Some variables haven't been initialized. Run 'init' firstly.");
     std::string log = '[' + tohhmmss(timer->getTime()) + ']' + '[' + tag + "] " + message + '\n';
     wprintw(win,log.c_str());
     wrefresh(win);
+}
+
+std::string pd::Logger::getstring()
+{
+    std::string input;
+    // let the terminal do the line editing
+    nocbreak();
+    echo();
+    // this reads from buffer after <ENTER>, not "raw" 
+    // so any backspacing etc. has already been taken care of
+    int ch = wgetch(win);
+    while ( ch != '\n' )
+    {
+        input.push_back( ch );
+        ch = wgetch(win);
+    }
+    return input;
+}
+
+std::string pd::Logger::requestInput(std::string prefix)
+{
+    if(win == nullptr or timer == nullptr)
+        throw std::invalid_argument("Some variables haven't been initialized. Run 'init' firstly.");
+    wprintw(win,prefix.c_str());
+    
+    return getstring();
 }

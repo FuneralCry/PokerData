@@ -13,9 +13,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     // Cut intro
     video = new VideoPlayer(path);
     this->markupTerminal(0.8);
-    Logger::timer = video;
-    Logger::win = this->log_win;
-    pd::Human::win = this->log_win;
+    pd::Logger::init(this->log_win,video);
     this->progress = new pd::ProgressBar(video,this->progress_win,video->getDuration());
     this->progress->update();
     cv::Mat frame;
@@ -23,11 +21,11 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     do
     {
         frame = this->video->play();
+        this->progress->update();
     }
     while(not isFirstFrame(frame));
     // Clear picture from animations
     frame = video->skip(2);
-    cv::imwrite("first.jpg",frame);
     // Set user fps
     this->video->setFps(fps);
     std::vector<cv::Rect> players;
@@ -64,7 +62,7 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     enumerate_players(players);
     pd::Logger::createLogEntry("Please, enter players nickname manualy","MANUAL");
     for(cv::Rect player : players)
-        this->players.push_back(pd::Player(ocr,frame,player,true,pd::Human::askUser(frame(player)))); // pd::Human::askUser(frame(player))
+        this->players.push_back(pd::Player(ocr,frame,player,true,"foo")); // askUser(frame(player))
     // Create board
     this->board = new pd::Board(ocr,frame,board,this->event);
     // Order players from SB to BU
@@ -87,9 +85,8 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
                 1,
                 cv::Scalar(0,0,255));
         }
-        pd::Logger::createLogEntry("Can't find button. Please, enter button player number manualy","INPUT");
-        int button_num(std::stoi(pd::Human::askUser(std::move(copy_frame))));
-        std::rotate(this->players.begin(),this->players.begin()+button_num,this->players.end());
+        int button_num(std::stoi(pd::askUser(copy_frame,"Can't find button. Please, enter button player number manualy")));
+        std::rotate(this->players.begin(),this->players.begin()+button_num+1,this->players.end());
     }
     // Create game
     std::vector<pkr::Player> pkr_players;

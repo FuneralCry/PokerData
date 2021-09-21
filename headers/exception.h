@@ -11,7 +11,7 @@ namespace pd
     private:
         std::string err_message;
     public:
-        explicit InterimFrame(std::string_view obj_type) throw();
+        InterimFrame(std::string_view obj_type) throw();
         ~InterimFrame() throw();
         const char* what() const throw();
     };
@@ -21,7 +21,7 @@ namespace pd
     private:
         std::string err_message;
     public:
-        explicit bad_recognition(std::string_view obj_type) throw();
+        bad_recognition(std::string_view obj_type) throw();
         ~bad_recognition() throw();
         const char* what() const throw();
     };

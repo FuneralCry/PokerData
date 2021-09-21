@@ -54,6 +54,8 @@ void pd::Observe::eraseEliminated()
         p.active = false;
 }
 
+bool pd::Observe::checkStakeMiss(const cv::Rect& stake) { return isIntersects(stake,this->board->getCont()); }
+
 std::vector<pd::Player>::iterator pd::Observe::whoseRect(cv::Rect rect)
 {
     // If rect belongs to this->board, terminate

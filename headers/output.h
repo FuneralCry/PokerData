@@ -12,10 +12,15 @@ namespace pd
 {
     class Logger
     {
-    public:
+    private:
         static Timer* timer;
         static WINDOW* win;
+
+        static std::string getstring();
+    public:
         static void createLogEntry(std::string message,std::string tag);
+        static std::string requestInput(std::string prefix);
+        static void init(WINDOW*,Timer*);
     };
 
     class ProgressBar

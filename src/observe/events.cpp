@@ -45,6 +45,7 @@ void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
 void pd::Observe::event_NEW_BOARD_CARD()
 {
     ++this->state;
+    this->was_bet = false;
     switch(state)
     {
         // Turn and river has one new card
@@ -52,7 +53,7 @@ void pd::Observe::event_NEW_BOARD_CARD()
             [[fallthrough]];
         case pkr::river:
             // Trigger game by it
-            this->game->changeGameState(std::vector<pkr::Card>({(pkr::Card)*this->board->getCards().rbegin()}),this->board->getPotSize());
+            this->game->changeGameState(std::vector<pkr::Card>({(pkr::Card)*this->board->getCards().rbegin()}));
             break;
         // Flop has three actually)
         case pkr::flop:
@@ -62,7 +63,7 @@ void pd::Observe::event_NEW_BOARD_CARD()
             for(pd::Card c : pd_cards)
                 pkr_cards.push_back(c);
             // Trigger game by them all
-            this->game->changeGameState(pkr_cards,this->board->getPotSize());
+            this->game->changeGameState(pkr_cards);
             break;
         }
         default:

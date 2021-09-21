@@ -3,6 +3,7 @@
 void pd::Observe::playerBet(int player_num, cv::Mat&& stake)
 {
     cv::imwrite("bett.jpg",stake);
+    cv::Mat stake_backup(stake);
     // Read bet size string from frame
     std::string bet_size_str(this->ocr->getText(std::move(stake),pd::OCR::TextType::BET));
     //  Clear it and extract digits
@@ -18,7 +19,21 @@ void pd::Observe::playerBet(int player_num, cv::Mat&& stake)
     else
         throw pd::bad_recognition("pd::Observe::playerBet()");
     // Trigger game
-    this->game->playerAction(player_num,pkr::bet,bet_size);
+    if(bet_size != this->players[player_num].last_stake)
+    {
+        ask_user:
+        try
+        {
+            this->game->playerAction(player_num,pkr::Actions::bet,bet_size);
+            this->players[player_num].last_stake = bet_size;
+        }
+        catch(pkr::bad_stake ex)
+        {
+            pd::Logger::createLogEntry(ex.what(),"ERROR");
+            bet_size = std::stoll(askUser(stake_backup,"Please, enter stake value manually"));
+            goto ask_user;
+    }
+    }
     pd::Logger::createLogEntry(m[0].str(),"BET");
 }
 
@@ -26,8 +41,9 @@ void pd::Observe::checkFolded()
 {
     for(int i(0); i < this->players.size(); ++i)
     {
-        if(this->players[i].folded)
-            this->game->playerAction(i,pkr::fold);
+        if(this->game->actAllowed(i))
+            if(this->players[i].folded)
+                this->game->playerAction(i,pkr::Actions::fold);
     }
 }
 
@@ -60,8 +76,19 @@ void pd::Observe::processStakes(std::vector<cv::Rect> stakes)
     {
         // If it is not in the middle
         if(p.first >= 0)
+        {
+            if(not this->was_bet)
+            {
+                for(int i(p.first-1); i >= 0; --i)
+                    if(this->game->actAllowed(i))
+                        this->game->playerAction(i,pkr::Actions::check);
+            }
             if(this->game->actAllowed(p.first))
+            {
                 // Trigger game
                 playerBet(p.first,frame(p.second));
+                this->was_bet = true;
+            }
+        }
     }
 }

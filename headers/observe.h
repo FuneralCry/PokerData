@@ -35,6 +35,7 @@ namespace pd
         std::vector<pd::Player> players; // Players container
         pd::Board* board;  // Board class
         int state;  // Current game state
+        bool was_bet{false};
         cv::Point center;  // Reference point for specifying angels for players. Basicly it is center of bottom edge of board contour
         pd::EventGuard event;
         pd::ProgressBar* progress;
@@ -53,6 +54,7 @@ namespace pd
         // Finds nearest player to the Rect
         std::vector<pd::Player>::iterator whoseRect(cv::Rect);
         void markupTerminal(double ratio);
+        bool checkStakeMiss(const cv::Rect&);
 
         // Player's actions methods
 

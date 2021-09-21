@@ -12,6 +12,7 @@
 #include "card.h"
 #include "text.h"
 #include "exception.h"
+#include "human.h"
 #include "../Poker/headers/poker.h"
 
 namespace pd
@@ -24,7 +25,7 @@ namespace pd
         std::vector<pd::Card> hand;
         std::string nickname;
     public:
-        long long stack{NULL};
+        long long stack{NULL},last_stake{-1};
         bool active{false};
         bool folded;
 
