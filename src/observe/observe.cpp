@@ -6,6 +6,9 @@
 pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
 {
     initscr();
+    std::cout.setstate(std::ios::failbit);
+    std::cerr.setstate(std::ios::failbit);
+    std::clog.setstate(std::ios::failbit);
     this->output.open("lol",std::fstream::in | std::fstream::trunc | std::fstream::out);
     pd::Models::addModel(cv::dnn::readNetFromDarknet(PATH_TO_CFG,PATH_TO_WEIGHTS));
     scrollok(stdscr,true);
