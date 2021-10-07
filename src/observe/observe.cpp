@@ -63,11 +63,11 @@ pd::Observe::Observe(const std::string& path, const unsigned int fps) : fps(fps)
     this->center = (board.tl() + board.br()) / 2;
     // Sort players in clockwise order
     enumerate_players(players);
-    pd::Logger::createLogEntry("Please, enter players nickname manualy","MANUAL");
+    pd::Logger::createLogEntry("Please, enter players nicknames manualy","MANUAL");
     for(cv::Rect player : players)
-        this->players.push_back(pd::Player(ocr,frame,player,true,"foo")); // askUser(frame(player))
+        this->players.push_back(pd::Player(ocr,frame,player,"foo")); // askUser(frame(player))
     // Create board
-    this->board = new pd::Board(ocr,frame,board,this->event);
+    this->board = new pd::Board(ocr,frame,board);
     // Order players from SB to BU
     if(not button.empty())
     {
@@ -114,7 +114,7 @@ void pd::Observe::start()
             // Get bounding boxes of objects and their types
             std::vector<pd::Obj> bboxes(pd::Models::getBboxes(frame));
             // Prepare containers for boxes
-            std::vector<cv::Rect> players,stakes;
+            std::vector<cv::Rect> players,stakes,cards;
             // Initialy all players are folded. If we find a card belonging to player we will mark it as non-folded
             for(pd::Player& p : this->players)
                 p.folded = true;
@@ -129,32 +129,26 @@ void pd::Observe::start()
                         break;
                     // Update board class instantly
                     case (int)pd::Indices::board:
-                        this->board->update(frame,bbox.first,this->event);
+                        this->board->update(frame,bbox.first);
                         break;
                     // Collect stakes bounding boxes for future processing
                     case (int)pd::Indices::stake:
                         stakes.push_back(bbox.first);
                         break;
                     case (int)pd::Indices::card:
-                        // Find players with card
-                        auto p_it(std::find_if(this->players.begin(),this->players.end(),[bbox](pd::Player p) { return isIntersects(bbox.first,p.getCont()); }));
-                        // Consider him as non-folded
-                        p_it->folded = false;
+                        cards.push_back(bbox.first);
                         break;
                 }
             }
-
+            checkFolded(cards);
+            checkEvents();
             switch(this->event.get())
             {
                 case pd::Events::NU:
-                    // Search for folded players
-                    checkFolded();
                     // Process stakes
                     processStakes(stakes);
                     break;
                 case pd::Events::NEW_BOARD_CARD:
-                    // Search for folded players
-                    checkFolded();
                     // Process stakes
                     processStakes(stakes);
                     event_NEW_BOARD_CARD();
@@ -179,5 +173,6 @@ void pd::Observe::start()
 
 pd::Observe::~Observe()
 {
+    endwin();
     delete game,board;
 }

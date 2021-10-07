@@ -19,6 +19,7 @@
 #include "exception.h"
 #include "output.h"
 #include "human.h"
+#include "recognition.h"
 #include "../Poker/headers/poker.h"
 
 #define NEW_GAME_TIME_LIMIT 3
@@ -34,6 +35,7 @@ namespace pd
         pkr::Game* game;  // Poker engine
         std::vector<pd::Player> players; // Players container
         pd::Board* board;  // Board class
+        pd::Recognition bet_size,pot_size;
         int state;  // Current game state
         bool was_bet{false};
         cv::Point center;  // Reference point for specifying angels for players. Basicly it is center of bottom edge of board contour
@@ -61,7 +63,7 @@ namespace pd
         // Reaction on a player's bet
         void playerBet(int player,cv::Mat&& stake);
         // Searchs for folded players
-        void checkFolded();
+        void checkFolded(const std::vector<cv::Rect>& cards);
         // Associate player number with stake rect
         std::vector<std::pair<int,cv::Rect>> linkPlayers2Stakes(std::vector<cv::Rect> stakes);
         // Extract useful information from all stakes bboxes
@@ -73,6 +75,7 @@ namespace pd
         void event_NEW_GAME(std::vector<cv::Rect> players);
         // Handles NEW_BOARD_CARD event
         void event_NEW_BOARD_CARD();
+        void checkEvents();
 
         // Frames capturing members
 

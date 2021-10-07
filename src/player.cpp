@@ -4,9 +4,9 @@
 #include "../headers/player.h"
 #include <boost/algorithm/string.hpp>
 
-pd::Player::Player(pd::OCR* ocr, const cv::Mat& frame, const cv::Rect& cont, bool allow_fold,std::string nickname) : nickname(nickname), cont(cont), ocr(ocr)
+pd::Player::Player(pd::OCR* ocr, const cv::Mat& frame, const cv::Rect& cont, std::string nickname) : nickname(nickname), cont(cont), ocr(ocr)
 {
-    this->update(frame,cont,allow_fold);
+    this->update(frame,cont);
 }
 
 pd::Player::operator pkr::Player() const
@@ -17,7 +17,7 @@ pd::Player::operator pkr::Player() const
         return pkr::Player(this->nickname);
 }
 
-void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont, bool allow_fold)
+void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont)
 {
     active = true;
 
@@ -35,7 +35,7 @@ void pd::Player::update(const cv::Mat& frame, const cv::Rect& cont, bool allow_f
             stack_cont = rect.first;
     }
     cv::imwrite("player.jpg",frame);
-    if(hand.size() != 2 and not allow_fold)
+    if(hand.size() == 1)
         throw pd::InterimFrame("void pd::Player::update(...)");
     if(hand.size())
     {

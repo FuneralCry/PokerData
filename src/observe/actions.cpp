@@ -2,7 +2,6 @@
 
 void pd::Observe::playerBet(int player_num, cv::Mat&& stake)
 {
-    cv::imwrite("bett.jpg",stake);
     cv::Mat stake_backup(stake);
     // Read bet size string from frame
     std::string bet_size_str(this->ocr->getText(std::move(stake),pd::OCR::TextType::BET));
@@ -11,39 +10,56 @@ void pd::Observe::playerBet(int player_num, cv::Mat&& stake)
     boost::erase_all(bet_size_str,".");
     std::regex r("\\d+");
     std::smatch m;
-    long long bet_size;
     if(std::regex_search(bet_size_str,m,r))
-    {
-        bet_size = std::stoll(m[0].str());
-    }
+        this->bet_size.update(m[0].str());
     else
-        throw pd::bad_recognition("pd::Observe::playerBet()");
-    // Trigger game
-    if(bet_size != this->players[player_num].last_stake)
     {
-        ask_user:
+        pd::Logger::createLogEntry("Can't recognize bet size.","ERROR");
+        this->bet_size.fix(askUser(stake_backup,"Please, enter stake value manually"));
+    }
+    // Trigger game
+    while(true)
+    {
         try
         {
-            this->game->playerAction(player_num,pkr::Actions::bet,bet_size);
-            this->players[player_num].last_stake = bet_size;
+            if(this->players[player_num].last_stake == std::stoll(bet_size.get()))
+                break;
+            this->game->playerAction(player_num,pkr::Actions::bet,std::stoll(this->bet_size.get()));
+            this->players[player_num].last_stake = std::stoll(this->bet_size.get());
+            pd::Logger::createLogEntry(this->bet_size.get(),"BET");
+            break;
         }
         catch(pkr::bad_stake ex)
         {
             pd::Logger::createLogEntry(ex.what(),"ERROR");
-            bet_size = std::stoll(askUser(stake_backup,"Please, enter stake value manually"));
-            goto ask_user;
+            this->bet_size.fix(askUser(stake_backup,"Please, enter stake value manually"));
+        }
     }
-    }
-    pd::Logger::createLogEntry(m[0].str(),"BET");
 }
 
-void pd::Observe::checkFolded()
+void pd::Observe::checkFolded(const std::vector<cv::Rect>& cards)
 {
-    for(int i(0); i < this->players.size(); ++i)
+    for(int i(this->game->getOrder()[0]); i < this->players.size(); i = (i+1) % (this->players.size() + 1))
     {
-        if(this->game->actAllowed(i))
-            if(this->players[i].folded)
+        int cards_num;
+        if(this->game->getOrder().size() == 1)
+            break;
+        for(const cv::Rect& c : cards)
+        {
+            if(isIntersects(c,this->players[i].getCont()))
+                ++cards_num;
+        }
+        if(cards_num == 0)
+        {
+            if(this->game->actAllowed(i))
+            {
                 this->game->playerAction(i,pkr::Actions::fold);
+                pd::Logger::createLogEntry("Fold","FOLD");
+                this->players[i].folded = true;
+            }
+        }
+        else if(cards_num == 1)
+            throw pd::InterimFrame("void pd::Observe::checkFolded(...)");
     }
 }
 

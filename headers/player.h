@@ -29,8 +29,8 @@ namespace pd
         bool active{false};
         bool folded;
 
-        Player(pd::OCR* ocr,const cv::Mat& frame,const cv::Rect& cont,bool allow_fold,std::string nickname);
-        void update(const cv::Mat& frame, const cv::Rect& cont,bool allow_fold);
+        Player(pd::OCR* ocr,const cv::Mat& frame,const cv::Rect& cont,std::string nickname) noexcept(false);
+        void update(const cv::Mat& frame, const cv::Rect& cont);
         cv::Rect getCont() const;
         std::string status() const;
         

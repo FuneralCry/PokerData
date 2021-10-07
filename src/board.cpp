@@ -3,9 +3,9 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 #include "../headers/board.h"
 
-pd::Board::Board(pd::OCR* ocr,const cv::Mat& frame, const cv::Rect& cont, pd::EventGuard& event) : ocr(ocr), cont(cont)
+pd::Board::Board(pd::OCR* ocr,const cv::Mat& frame, const cv::Rect& cont) : ocr(ocr), cont(cont)
 {
-    this->update(frame,cont,event);
+    this->update(frame,cont);
 }
 
 pd::Board::operator std::vector<pkr::Card>() const
@@ -38,7 +38,7 @@ void pd::Board::updatePot(cv::Mat&& pot_mat)
     pd::Logger::createLogEntry(m[0].str(),"POT");
 }
 
-void pd::Board::update(const cv::Mat& frame, const cv::Rect& cont, pd::EventGuard& event)
+void pd::Board::update(const cv::Mat& frame, const cv::Rect& cont)
 {
     this->cont = cont;
     cv::Mat board(frame(cont));
@@ -55,14 +55,9 @@ void pd::Board::update(const cv::Mat& frame, const cv::Rect& cont, pd::EventGuar
     }
     // Check if there are suitable amount of cards and pot size has been found
     assert(cards.size() <= 5 and not pot_size_cont.empty());
-    // If there are not enough cards throw an exception
-    if(cards.size() < 3 and cards.size() > 0)
-        throw pd::InterimFrame("void pd::Board::update(...)");
     // If there are more cards then eralier...
-    else if(cards.size() > this->cards.size())
+    if(cards.size() > this->cards.size())
     {
-        // Firstly update event type
-        event.update(pd::Events::NEW_BOARD_CARD);
         // For all cards find elements inside
         for(auto& card : cards)
         {
@@ -87,17 +82,4 @@ void pd::Board::update(const cv::Mat& frame, const cv::Rect& cont, pd::EventGuar
         // Update pot size
         updatePot(board(pot_size_cont));
     }
-    // If board has been cleared...
-    else if(cards.size() < this->cards.size())
-    {
-        // update event type
-        event.update(pd::Events::NEW_GAME);
-        // clear board
-        this->cards.clear();
-        // update pot size
-        updatePot(board(pot_size_cont));
-    }
-    // Otherwise do nothing and just update event type
-    else
-        event.update(pd::Events::NU);
 }

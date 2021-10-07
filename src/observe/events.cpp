@@ -4,9 +4,6 @@ std::string bool2string(bool val) { return val ? "true" : "false"; }
 
 void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
 {
-    this->new_game_time += (double)1/(double)this->fps;
-    pd::Logger::createLogEntry("Forcibly complete new game fase on this iteration: " + bool2string(this->new_game_time >= NEW_GAME_TIME_LIMIT),
-        "INFO");
     // Get current frame
     cv::Mat frame(video->get());
     pd::Logger::createLogEntry("Updating players...", "INFO");
@@ -17,7 +14,7 @@ void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
         if(p != this->players.end())
         {
             // Update it
-            p->update(frame,rect,this->new_game_time >= NEW_GAME_TIME_LIMIT);
+            p->update(frame,rect);
             pd::Logger::createLogEntry(p->status(),"INFO");
         }
         else
@@ -35,11 +32,11 @@ void pd::Observe::event_NEW_GAME(std::vector<cv::Rect> players)
     this->event.reset();
     // Reset state
     this->state = 0;
+    this->game->end();
     this->output << *game << std::endl;
     // Delete old game and create new
     delete this->game;
     this->game = new pkr::Game(pkr_players,std::vector<pkr::Card>());
-    this->new_game_time = 0;
 }
 
 void pd::Observe::event_NEW_BOARD_CARD()
@@ -73,4 +70,19 @@ void pd::Observe::event_NEW_BOARD_CARD()
     pd::Logger::createLogEntry("Board: " + this->game->getBoard(), "INFO");
     // Event is NU now
     this->event.reset();
+}
+
+void pd::Observe::checkEvents()
+{
+    int active_players_num(0);
+    if(this->board->getCards().size() < 3 and this->board->getCards().size() > 0)
+        throw pd::InterimFrame("void pd::Observe::checkEvents()");
+    for(Player p : this->players)
+        active_players_num += p.folded ? 0 : 1;
+    if(active_players_num > this->game->getOrder().size())
+        this->event.update(pd::Events::NEW_GAME);
+    else if(std::max(0,(int)this->board->getCards().size()-2) > this->state)
+        this->event.update(pd::Events::NEW_BOARD_CARD);
+    else
+        this->event.update(pd::Events::NU);
 }

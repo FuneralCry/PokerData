@@ -117,6 +117,8 @@ void pd::OCR::adjustThr(cv::Mat&& frame, OCR::TextType type) noexcept
     cv::createTrackbar("Threshold",this->adj_win_name,NULL,255,on_thr_trackbar,&origin_filtered);
     cv::createTrackbar("Dilation",this->adj_win_name,NULL,10,on_dilate_trackbar,&origin_filtered);
     cv::imshow(this->adj_win_name,frame);
+    on_thr_trackbar(0,&origin_filtered);
+    on_dilate_trackbar(0,&origin_filtered);
     cv::waitKey(0);
     cv::destroyWindow(this->adj_win_name);
     cv::imwrite("tettt.jpg",frame);

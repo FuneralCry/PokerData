@@ -18,7 +18,7 @@ namespace pd
         int value{-1};
         int suit{-1};
     public:
-        Card(cv::Rect,std::vector<int>);
+        Card(cv::Rect,std::vector<int>) noexcept(false);
         int getValue() const;
         int getSuit() const;
 
